@@ -1,4 +1,4 @@
-package com.openclassrooms.rebonnte.ui.aisle
+package com.openclassrooms.rebonnte.feature.aisle
 
 import android.content.Intent
 import android.os.Bundle
@@ -29,10 +29,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
 import com.openclassrooms.rebonnte.MainActivity
-import com.openclassrooms.rebonnte.ui.medicine.Medicine
-import com.openclassrooms.rebonnte.ui.medicine.MedicineDetailActivity
-import com.openclassrooms.rebonnte.ui.medicine.MedicineViewModel
-import com.openclassrooms.rebonnte.ui.theme.RebonnteTheme
+import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.feature.medicine.MedicineDetailActivity
+import com.openclassrooms.rebonnte.feature.medicine.MedicineViewModel
+import com.openclassrooms.rebonnte.core.ui.theme.RebonnteTheme
 
 class AisleDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
