@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.google.services)
+    // alias(libs.plugins.google.services)
 }
 
 android {
@@ -59,7 +59,6 @@ dependencies {
     // --- NOYAU & LANCEMENT ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.core.splashscreen)
     implementation(platform(libs.kotlin.bom))
     
     // --- JETPACK COMPOSE (UI Globale & Splash) ---
@@ -67,6 +66,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.material3)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.compose.icons.extended)
 
     // --- ARCHITECTURE & NAVIGATION ---
     implementation(libs.hilt.android)

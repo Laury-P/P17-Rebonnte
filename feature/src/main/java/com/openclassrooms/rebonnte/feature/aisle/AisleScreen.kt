@@ -1,7 +1,5 @@
 package com.openclassrooms.rebonnte.feature.aisle
 
-import android.content.Context
-import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,21 +17,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
 
+@Destination<RootGraph>
 @Composable
 fun AisleScreen(viewModel: AisleViewModel) {
     val aisles by viewModel.aisles.collectAsState(initial = emptyList())
-    val context = LocalContext.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
         items(aisles) { aisle ->
             AisleItem(aisle = aisle, onClick = {
-                startDetailActivity(context, aisle.name)
+                //TODO navigate vers aisledetail
             })
         }
     }
@@ -53,9 +52,3 @@ fun AisleItem(aisle: Aisle, onClick: () -> Unit) {
     }
 }
 
-private fun startDetailActivity(context: Context, name: String) {
-    val intent = Intent(context, AisleDetailActivity::class.java).apply {
-        putExtra("nameAisle", name)
-    }
-    context.startActivity(intent)
-}

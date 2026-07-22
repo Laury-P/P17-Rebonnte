@@ -32,6 +32,11 @@ android {
         compose = true
     }
 }
+ksp {
+    arg("compose-destinations.generatedVisibility", "public")
+    arg("compose-destinations.moduleName", "feature")
+    arg("compose-destinations.mode", "multi")
+}
 
 dependencies {
     implementation(project(":core"))
