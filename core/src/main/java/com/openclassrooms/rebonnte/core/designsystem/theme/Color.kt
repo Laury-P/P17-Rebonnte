@@ -1,4 +1,4 @@
-package com.openclassrooms.rebonnte.ui.theme
+package com.openclassrooms.rebonnte.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

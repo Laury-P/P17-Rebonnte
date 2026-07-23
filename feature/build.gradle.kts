@@ -1,32 +1,23 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    // alias(libs.plugins.google.services)
+    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.openclassrooms.rebonnte"
+    namespace = "com.openclassrooms.rebonnte.feature"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.openclassrooms.rebonnte"
         minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,52 +28,45 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-
     buildFeatures {
         compose = true
-        buildConfig = true
     }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
+}
+ksp {
+    arg("compose-destinations.generatedVisibility", "public")
+    arg("compose-destinations.moduleName", "feature")
+    arg("compose-destinations.mode", "multi")
 }
 
 dependencies {
-    // --- MODULES LOCAUX ---
     implementation(project(":core"))
     implementation(project(":data"))
-    implementation(project(":feature"))
 
-    // --- NOYAU & LANCEMENT ---
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.kotlin.bom))
-    
-    // --- JETPACK COMPOSE (UI Globale & Splash) ---
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.compose.icons.extended)
-
-    // --- ARCHITECTURE & NAVIGATION ---
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    
+    // Navigation
     implementation(libs.compose.destinations.core)
     ksp(libs.compose.destinations.ksp)
     implementation(libs.hilt.navigation.compose)
 
-    // --- 🧪 TESTS (Unitaires & UI) ---
+
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Tests
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
-    testImplementation(libs.mockk)
-    
     androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.junit4)
-    androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

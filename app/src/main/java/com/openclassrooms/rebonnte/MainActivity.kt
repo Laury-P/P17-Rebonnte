@@ -3,22 +3,11 @@ package com.openclassrooms.rebonnte
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,88 +34,73 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.openclassrooms.rebonnte.ui.aisle.AisleScreen
-import com.openclassrooms.rebonnte.ui.aisle.AisleViewModel
-import com.openclassrooms.rebonnte.ui.medicine.MedicineScreen
-import com.openclassrooms.rebonnte.ui.medicine.MedicineViewModel
-import com.openclassrooms.rebonnte.ui.theme.RebonnteTheme
+import com.openclassrooms.rebonnte.core.ui.theme.RebonnteTheme
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.generated.feature.navgraphs.RootNavGraph
+import com.ramcosta.composedestinations.generated.feature.destinations.AisleScreenDestination
+import com.ramcosta.composedestinations.generated.feature.destinations.MedicineScreenDestination
+import com.ramcosta.composedestinations.utils.currentDestinationAsState
+import com.ramcosta.composedestinations.utils.startDestination
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private lateinit var myBroadcastReceiver: MyBroadcastReceiver
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainActivity = this
+        enableEdgeToEdge()
         setContent {
-            MyApp()
+            RebonnteTheme {
+                val navController = rememberNavController()
+                val currentDestination = navController.currentDestinationAsState().value
+                    ?: RootNavGraph.startDestination
+
+
+                Scaffold(
+                    modifier = Modifier,
+                    bottomBar = {
+                        NavigationBar {
+                            NavigationBarItem(
+                                icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                                label = { Text("Aisle") },
+                                selected = currentDestination == AisleScreenDestination,
+                                onClick = { navController.navigate(AisleScreenDestination.route) }
+                            )
+                            NavigationBarItem(
+                                icon = { Icon(Icons.Default.List, contentDescription = null) },
+                                label = { Text("Medicine") },
+                                selected = currentDestination == MedicineScreenDestination,
+                                onClick = { navController.navigate(MedicineScreenDestination.route) }
+                            )
+                        }
+                    },
+                ) { innerPadding ->
+                    DestinationsNavHost(
+                        navGraph = RootNavGraph,
+                        navController = navController,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+
+            }
         }
-        startBroadcastReceiver()
-    }
-
-    private fun startMyBroadcast() {
-        val intent = Intent("com.rebonnte.ACTION_UPDATE")
-        sendBroadcast(intent)
-        startBroadcastReceiver()
-    }
-
-    private fun startBroadcastReceiver() {
-        myBroadcastReceiver = MyBroadcastReceiver()
-        val filter = IntentFilter().apply {
-            addAction("com.rebonnte.ACTION_UPDATE")
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(myBroadcastReceiver, filter, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(myBroadcastReceiver, filter)
-        }
-
-        Handler().postDelayed({
-            startMyBroadcast()
-        }, 200)
-    }
-
-
-    class MyBroadcastReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            Toast.makeText(mainActivity, "Update reçu", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    companion object {
-        lateinit var mainActivity: MainActivity
     }
 }
+
+/**
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyApp() {
-    val navController = rememberNavController()
-    val medicineViewModel: MedicineViewModel = viewModel()
-    val aisleViewModel: AisleViewModel = viewModel()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val route = navBackStackEntry?.destination?.route
-
     RebonnteTheme {
         Scaffold(
             topBar = {
@@ -196,22 +170,6 @@ fun MyApp() {
                 }
 
             },
-            bottomBar = {
-                NavigationBar {
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                        label = { Text("Aisle") },
-                        selected = currentRoute(navController) == "aisle",
-                        onClick = { navController.navigate("aisle") }
-                    )
-                    NavigationBarItem(
-                        icon = { Icon(Icons.Default.List, contentDescription = null) },
-                        label = { Text("Medicine") },
-                        selected = currentRoute(navController) == "medicine",
-                        onClick = { navController.navigate("medicine") }
-                    )
-                }
-            },
             floatingActionButton = {
                 FloatingActionButton(onClick = {
                     if (route == "medicine") {
@@ -235,12 +193,7 @@ fun MyApp() {
         }
     }
 }
-
-@Composable
-fun currentRoute(navController: NavController): String? {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    return navBackStackEntry?.destination?.route
-}
+**/
 
 @Composable
 fun EmbeddedSearchBar(
