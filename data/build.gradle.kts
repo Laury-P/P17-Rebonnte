@@ -56,4 +56,5 @@ dependencies {
     // Tests
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.junit.platform.launcher)
 }

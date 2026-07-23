@@ -84,6 +84,7 @@ dependencies {
     // --- 🧪 TESTS (Unitaires & UI) ---
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.junit.platform.launcher)
     testImplementation(libs.mockk)
     
     androidTestImplementation(platform(libs.androidx.compose.bom))
