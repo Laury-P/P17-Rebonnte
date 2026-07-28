@@ -1,7 +1,9 @@
 package com.openclassrooms.rebonnte.data.di
 
 import com.openclassrooms.rebonnte.core.domain.repository.AuthRepository
+import com.openclassrooms.rebonnte.core.domain.repository.UserRepository
 import com.openclassrooms.rebonnte.data.auth.FirebaseAuthRepository
+import com.openclassrooms.rebonnte.data.user.FirebaseUserRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,4 +19,11 @@ abstract class RepositoryModule {
     abstract fun bindAuthRepository(
         firebaseAuthRepository: FirebaseAuthRepository
     ) : AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindUserRepository(
+        firebaseUserRepository: FirebaseUserRepository
+    ) : UserRepository
+
 }
