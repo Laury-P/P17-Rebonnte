@@ -1,3 +1,6 @@
 package com.openclassrooms.rebonnte.core.domain.model
 
-class Aisle(var name: String)
+data class Aisle (
+    var name: String = "",
+    var aisleId : String = ""
+)
