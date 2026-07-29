@@ -22,7 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.feature.aisle.list.AisleViewModel
 import com.openclassrooms.rebonnte.feature.medicine.MedicineViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -30,7 +32,9 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AisleDetailScreen(aisleId: String, viewModel: MedicineViewModel) {
+fun AisleDetailScreen(aisleId: String, viewModel: AisleViewModel = hiltViewModel()) {
+    Text("$aisleId")
+    /**
     val medicines by viewModel.medicines.collectAsState(initial = emptyList())
     val filteredMedicines = medicines.filter { it.aisleId == aisleId}
 
@@ -46,6 +50,7 @@ fun AisleDetailScreen(aisleId: String, viewModel: MedicineViewModel) {
             }
         }
     }
+    **/
 }
 
 @Composable

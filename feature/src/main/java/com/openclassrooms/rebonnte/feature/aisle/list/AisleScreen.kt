@@ -1,6 +1,5 @@
 package com.openclassrooms.rebonnte.feature.aisle.list
 
-import android.graphics.pdf.content.PdfPageGotoLinkContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,17 +13,23 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -41,10 +46,12 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun AisleScreen(
     modifier: Modifier = Modifier,
     viewModel: AisleViewModel = hiltViewModel(),
-    navigator : DestinationsNavigator
+    navigator: DestinationsNavigator
 ) {
 
     val aislesState by viewModel.uiState.collectAsState()
+
+    val showNewAisleDialog = remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier,
@@ -55,12 +62,43 @@ fun AisleScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                // TODO OpenDialog to add aisle name
+                showNewAisleDialog.value = true
             }) {
                 Icon(Icons.Default.Add, contentDescription = "Add aisle")
             }
         }
     ) { innerPadding ->
+        if (showNewAisleDialog.value) {
+            var aisleName by remember { mutableStateOf("") }
+            AlertDialog(
+                onDismissRequest = { showNewAisleDialog.value = false },
+                title = { Text("Add new Aisle") },
+                text = {
+                    OutlinedTextField(
+                        value = aisleName,
+                        onValueChange = { aisleName = it },
+                        label = {Text("Aisle name: ")},
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.addAisle(aisleName)
+                            showNewAisleDialog.value = false
+                        },
+                        enabled = aisleName.isNotEmpty()
+                    ) {
+                        Text("Save")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showNewAisleDialog.value = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+
+        }
         when (aislesState) {
             is ListAislesState.Success -> {
                 val aisles = (aislesState as ListAislesState.Success).listAisle
