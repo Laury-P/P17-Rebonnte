@@ -16,6 +16,7 @@ class MedicineViewModel : ViewModel() {
         _medicines.value = ArrayList() // Initialiser avec une liste vide
     }
 
+    /**
     fun addRandomMedicine(aisles: List<Aisle>) {
         val currentMedicines = ArrayList(medicines.value)
         currentMedicines.add(
@@ -28,6 +29,7 @@ class MedicineViewModel : ViewModel() {
         )
         _medicines.value = currentMedicines
     }
+    **/
 
     fun filterByName(name: String) {
         val currentMedicines: List<Medicine> = medicines.value

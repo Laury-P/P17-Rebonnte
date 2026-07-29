@@ -30,9 +30,9 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AisleDetailScreen(name: String, viewModel: MedicineViewModel) {
+fun AisleDetailScreen(aisleId: String, viewModel: MedicineViewModel) {
     val medicines by viewModel.medicines.collectAsState(initial = emptyList())
-    val filteredMedicines = medicines.filter { it.nameAisle == name }
+    val filteredMedicines = medicines.filter { it.aisleId == aisleId}
 
     Scaffold { paddingValues ->
         LazyColumn(

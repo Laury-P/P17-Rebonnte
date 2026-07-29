@@ -1,5 +1,7 @@
 package com.openclassrooms.rebonnte.feature.medicine
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,6 +37,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import java.util.Date
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Destination<RootGraph>
 @Composable
 fun MedicineDetailScreen(name: String, viewModel: MedicineViewModel) {
@@ -57,7 +60,7 @@ fun MedicineDetailScreen(name: String, viewModel: MedicineViewModel) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             TextField(
-                value = medicine.nameAisle,
+                value = medicine.aisleId,
                 onValueChange = {},
                 label = { Text("Aisle") },
                 enabled = false,
@@ -70,11 +73,11 @@ fun MedicineDetailScreen(name: String, viewModel: MedicineViewModel) {
             ) {
                 IconButton(onClick = {
                     if (stock > 0) {
-                        medicines[medicines.size].histories.toMutableList().add(
+                        medicines[medicines.size].histories?.toMutableList()?.add(
                             History(
                                 medicine.name,
                                 "efeza56f1e65f",
-                                Date().toString(),
+                                timeStamp = Date().toInstant().toEpochMilli(),
                                 "Updated medicine details"
                             )
                         )
@@ -94,11 +97,11 @@ fun MedicineDetailScreen(name: String, viewModel: MedicineViewModel) {
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = {
-                    medicines[medicines.size].histories.toMutableList().add(
+                    medicines[medicines.size].histories?.toMutableList()?.add(
                         History(
                             medicine.name,
                             "efeza56f1e65f",
-                            Date().toString(),
+                            Date().toInstant().toEpochMilli(),
                             "Updated medicine details"
                         )
                     )
@@ -114,9 +117,13 @@ fun MedicineDetailScreen(name: String, viewModel: MedicineViewModel) {
             Text(text = "History", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(medicine.histories) { history ->
-                    HistoryItem(history = history)
+                val list = medicine.histories ?: emptyList()
+                if(list.isNotEmpty()){
+                    items(list) { history ->
+                        HistoryItem(history = history)
+                    }
                 }
+
             }
         }
     }
@@ -131,9 +138,9 @@ fun HistoryItem(history: History) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = history.medicineName, fontWeight = FontWeight.Bold)
+            Text(text = history.medicineId, fontWeight = FontWeight.Bold)
             Text(text = "User: ${history.userId}")
-            Text(text = "Date: ${history.date}")
+            Text(text = "Date: ${history.timeStamp}")
             Text(text = "Details: ${history.details}")
         }
     }
