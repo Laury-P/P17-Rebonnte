@@ -16,7 +16,7 @@ interface MedicineRepository {
 
     suspend fun addAisle(aisle: Aisle) : Result<Unit>
 
-    suspend fun saveMedicine(medicine: Medicine, creationHistory: History) : Result<Unit>
+    suspend fun saveMedicine(medicine: Medicine, history: History) : Result<Unit>
 
     suspend fun deleteMedicine(medicineId : String) : Result<Unit>
 
