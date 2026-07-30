@@ -37,7 +37,7 @@ fun AisleDetailScreen(
         topBar = {
             if (state is UiState.Success) {
                 TopAppBar(
-                    title = { Text((state as UiState.Success).aisleName) }
+                    title = { Text((state as UiState.Success).aisle.name) }
                 )
             }
         }

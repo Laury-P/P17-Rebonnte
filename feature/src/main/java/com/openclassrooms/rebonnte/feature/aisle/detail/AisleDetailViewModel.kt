@@ -3,6 +3,7 @@ package com.openclassrooms.rebonnte.feature.aisle.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +29,7 @@ class AisleDetailViewModel @Inject constructor(
             medicineRepository.getAisleNameById(aisleId),
             medicineRepository.getListMedicineByAisleId(aisleId)
         ) { aisle, medicines ->
-            UiState.Success(aisleName = aisle.name, medicines = medicines) as UiState
+            UiState.Success(aisle = aisle, medicines = medicines) as UiState
         }
             .catch { emit(UiState.Error(it.message ?: "Unknown error")) }
             .stateIn(
@@ -37,7 +38,7 @@ class AisleDetailViewModel @Inject constructor(
                 initialValue = UiState.Loading
             )
     } else {
-        MutableStateFlow(UiState.Error("Aisle ID missing"))
+        MutableStateFlow(UiState.Error("ID de rayon manquant"))
     }
 
 
@@ -45,7 +46,7 @@ class AisleDetailViewModel @Inject constructor(
 
 sealed interface UiState {
     data object Loading : UiState
-    data class Success(val aisleName: String, val medicines: List<Medicine>) : UiState
+    data class Success(val aisle: Aisle, val medicines: List<Medicine>) : UiState
     data class Error(val error: String) : UiState
 }
 
