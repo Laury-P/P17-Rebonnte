@@ -38,6 +38,11 @@ class FirebaseMedicineRepository @Inject constructor(
             }
     }
 
+    override fun getAisleNameById(aisleId: String): Flow<Aisle> = flow {
+        val snapshot = firestore.collection("aisles").document(aisleId).get().await()
+        emit(snapshot.toObject(Aisle::class.java) ?: return@flow)
+    }
+
     override fun getListMedicineByAisleId(aisleId: String): Flow<List<Medicine>> {
         return firestore.collection("medicines")
             .whereEqualTo("aisleId", aisleId)
