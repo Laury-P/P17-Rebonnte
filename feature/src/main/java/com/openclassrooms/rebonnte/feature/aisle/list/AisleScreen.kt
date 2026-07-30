@@ -18,10 +18,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
+import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.feature.destinations.AisleDetailScreenDestination
@@ -47,12 +51,28 @@ fun AisleScreen(
     navigator: DestinationsNavigator
 ) {
 
-    val aislesState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    val operationState by viewModel.operationState.collectAsState()
 
     val showNewAisleDialog = remember { mutableStateOf(false) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(operationState) {
+        if (operationState is OperationState.Error) {
+            val errorMessage = "Adding new aisle failed: ${(operationState as OperationState.Error).error}"
+
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                withDismissAction = true
+            )
+        }
+    }
+
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(text = "Aisle") }
@@ -97,9 +117,9 @@ fun AisleScreen(
             )
 
         }
-        when (aislesState) {
+        when (uiState) {
             is ListAislesState.Success -> {
-                val aisles = (aislesState as ListAislesState.Success).listAisle
+                val aisles = (uiState as ListAislesState.Success).listAisle
                 LazyColumn(
                     modifier = Modifier
                         .padding(innerPadding)
@@ -118,7 +138,9 @@ fun AisleScreen(
                             )
                         }
                     }
-
+                    if(operationState is OperationState.Loading) {
+                        item { LoadingComponent() }
+                    }
                 }
             }
 
@@ -128,7 +150,7 @@ fun AisleScreen(
 
             is ListAislesState.Error -> {
                 ErrorComponent(
-                    message = (aislesState as ListAislesState.Error).error,
+                    message = (uiState as ListAislesState.Error).error,
                     withRetryButton = true,
                     onRetryClick = { viewModel.retry() }
                 )

@@ -16,20 +16,19 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class AisleDetailViewModel @Inject constructor(
-    private val medicineRepository: MedicineRepository,
-    savedStateHandle: SavedStateHandle) :
-ViewModel(){
+    medicineRepository: MedicineRepository,
+    savedStateHandle: SavedStateHandle
+) :
+    ViewModel() {
 
-    private val aisleId : String? = savedStateHandle["aisleId"]
+    private val aisleId: String? = savedStateHandle["aisleId"]
 
     val uiState: StateFlow<UiState> = if (aisleId != null) {
         combine(
             medicineRepository.getAisleNameById(aisleId),
             medicineRepository.getListMedicineByAisleId(aisleId)
         ) { aisle, medicines ->
-            if (aisle != null) {
-                UiState.Success(aisleName = aisle.name, medicines = medicines)
-            } else UiState.Error("Aisle not found")
+            UiState.Success(aisleName = aisle.name, medicines = medicines) as UiState
         }
             .catch { emit(UiState.Error(it.message ?: "Unknown error")) }
             .stateIn(
@@ -46,7 +45,7 @@ ViewModel(){
 
 sealed interface UiState {
     data object Loading : UiState
-    data class Success(val aisleName: String, val medicines : List<Medicine>) : UiState
+    data class Success(val aisleName: String, val medicines: List<Medicine>) : UiState
     data class Error(val error: String) : UiState
 }
 

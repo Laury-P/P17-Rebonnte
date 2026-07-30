@@ -1,19 +1,9 @@
 package com.openclassrooms.rebonnte.feature.aisle.detail
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -22,13 +12,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
-import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.core.designsystem.common.MedicineItem
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.feature.destinations.AisleScreenDestination
@@ -79,28 +66,11 @@ fun AisleDetailScreen(
                     delay(2500)
                     navigator.navigate(AisleScreenDestination)
                 }
-                ErrorComponent(message = "An error occurred loading the aisle detail. \nYou will be redirected shortly")
+                ErrorComponent(message = "${(state as UiState.Error).error}. \nYou will be redirected shortly")
             }
         }
 
 
     }
 
-}
-
-@Composable
-fun MedicineItem(medicine: Medicine, onClick: (String) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick(medicine.name) }
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            Text(text = medicine.name, fontWeight = FontWeight.Bold)
-            Text(text = "Stock: ${medicine.stock}", color = Color.Gray)
-        }
-        Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Arrow")
-    }
 }

@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.openclassrooms.rebonnte.core.designsystem.common.MedicineItem
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -34,21 +35,6 @@ fun MedicineScreen(viewModel: MedicineViewModel = viewModel()) {
     }
 }
 
-@Composable
-fun MedicineItem(medicine: Medicine, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column {
-            Text(text = medicine.name, style = MaterialTheme.typography.bodyLarge)
-            Text(text = "Stock: ${medicine.stock}", style = MaterialTheme.typography.bodyMedium)
-        }
-        Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "Arrow")
-    }
-}
+
 
 
