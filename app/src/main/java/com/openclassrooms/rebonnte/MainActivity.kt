@@ -64,7 +64,6 @@ class MainActivity : ComponentActivity() {
                 val currentDestination = navController.currentDestinationAsState().value
                     ?: RootNavGraph.startDestination
 
-
                 Scaffold(
                     modifier = Modifier,
                     bottomBar = {
@@ -87,7 +86,7 @@ class MainActivity : ComponentActivity() {
                     DestinationsNavHost(
                         navGraph = RootNavGraph,
                         navController = navController,
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
                     )
                 }
 
@@ -109,7 +108,7 @@ fun MyApp() {
 
                 Column(verticalArrangement = Arrangement.spacedBy((-1).dp)) {
                     TopAppBar(
-                        title = { if (route == "aisle") Text(text = "Aisle") else Text(text = "Medicines") },
+                        title = {  else Text(text = "Medicines") },
                         actions = {
                             var expanded by remember { mutableStateOf(false) }
                             if (currentRoute(navController) == "medicine") {
@@ -174,9 +173,7 @@ fun MyApp() {
                 FloatingActionButton(onClick = {
                     if (route == "medicine") {
                         medicineViewModel.addRandomMedicine(aisleViewModel.aisles.value)
-                    } else if (route == "aisle") {
-                        aisleViewModel.addRandomAisle()
-                    }
+
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }

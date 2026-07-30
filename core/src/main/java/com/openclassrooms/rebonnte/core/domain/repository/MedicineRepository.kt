@@ -12,6 +12,8 @@ interface MedicineRepository {
 
     fun getListMedicineByAisleId(aisleId : String) : Flow<List<Medicine>>
 
+    fun getAisleNameById(aisleId: String) : Flow<Aisle>
+
     fun getMedicineDetailById(medicineId: String) : Flow<Medicine>
 
     suspend fun addAisle(aisle: Aisle) : Result<Unit>
