@@ -10,14 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -25,12 +26,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
+import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
-import com.openclassrooms.rebonnte.feature.aisle.list.AisleViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.feature.destinations.AisleScreenDestination
 import com.ramcosta.composedestinations.generated.feature.destinations.MedicineDetailScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.delay
 
 @Destination<RootGraph>
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,10 +73,14 @@ fun AisleDetailScreen(
                         }
                     }
                 }
-            is UiState.Loading -> {
-                CircularProgressIndicator()
+            is UiState.Loading -> { LoadingComponent() }
+            is UiState.Error -> {
+                LaunchedEffect(state) {
+                    delay(2500)
+                    navigator.navigate(AisleScreenDestination)
+                }
+                ErrorComponent(message = "An error occurred loading the aisle detail. \nYou will be redirected shortly")
             }
-            is UiState.Error -> Text((state as UiState.Error).error)
         }
 
 
@@ -93,6 +101,6 @@ fun MedicineItem(medicine: Medicine, onClick: (String) -> Unit) {
             Text(text = medicine.name, fontWeight = FontWeight.Bold)
             Text(text = "Stock: ${medicine.stock}", color = Color.Gray)
         }
-        Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = "Arrow")
+        Icon(imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Arrow")
     }
 }
