@@ -2,6 +2,7 @@ package com.openclassrooms.rebonnte.feature.medicine.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
@@ -35,6 +36,14 @@ class MedicineViewModel @Inject constructor(
     private val refreshSignal = MutableSharedFlow<Unit>(replay = 1).apply {
         tryEmit(Unit)
     }
+
+    val aisles: StateFlow<List<Aisle>> = medicineRepository.getListAisles()
+        .catch { emit(emptyList()) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     private val _operationState = MutableStateFlow<OperationState>(OperationState.Idle)
     val operationState : StateFlow<OperationState> = _operationState

@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.openclassrooms.rebonnte.core.domain.model.History
+import com.openclassrooms.rebonnte.feature.medicine.list.MedicineViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import java.util.Date
@@ -41,6 +42,11 @@ import java.util.Date
 @Destination<RootGraph>
 @Composable
 fun MedicineDetailScreen(name: String, viewModel: MedicineViewModel) {
+
+    Text(name)
+    /**
+     *
+
     val medicines by viewModel.medicines.collectAsState(initial = emptyList())
     val medicine = medicines.find { it.name == name } ?: return
     var stock by remember { mutableStateOf(medicine.stock) }
@@ -126,7 +132,7 @@ fun MedicineDetailScreen(name: String, viewModel: MedicineViewModel) {
 
             }
         }
-    }
+    }*/
 }
 
 @Composable
