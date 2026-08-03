@@ -13,23 +13,28 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @HiltViewModel
 class MedicineDetailViewModel @Inject constructor(
-    medicineRepository: MedicineRepository,
+    private val medicineRepository: MedicineRepository,
     savedStateHandle: SavedStateHandle,
     private val updateStockUseCase: UpdateStockUseCase
 ) : ViewModel() {
 
     private val medicineId: String? = savedStateHandle["medicineId"]
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val uiState : StateFlow<UiState> = if (medicineId != null) {
         medicineRepository.getMedicineDetailById(medicineId)
-            .map { medicine ->
-                UiState.Success(medicine) as UiState
+            .flatMapLatest { medicine ->
+                medicineRepository.getAisleNameById(medicine.aisleId).map { aisle ->
+                    UiState.Success(medicine.copy(aisleName = aisle.name)) as UiState
+                }
             }
             .catch { emit(UiState.Error(it.message ?: "Unknown error")) }
             .stateIn(

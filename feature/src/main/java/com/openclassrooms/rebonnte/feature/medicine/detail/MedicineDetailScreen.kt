@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +40,9 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.feature.destinations.MedicineScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -97,16 +101,15 @@ fun SuccessContent(
             value = medicine.name,
             onValueChange = {},
             label = { Text("Name") },
-            enabled = false,
             modifier = Modifier.fillMaxWidth(),
             readOnly = true
         )
 
         TextField(
-            value = medicine.aisleId, // TODO get aisle detail
+            value = medicine.aisleName,
             onValueChange = {},
             label = { Text("Aisle") },
-            enabled = false,
+            readOnly = true,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -128,7 +131,7 @@ fun SuccessContent(
                 value = medicine.stock.toString(),
                 onValueChange = {},
                 label = { Text("Stock") },
-                enabled = false,
+                readOnly = true,
                 modifier = Modifier.weight(1f)
             )
             IconButton(onClick = {
@@ -150,7 +153,7 @@ fun SuccessContent(
             val list = medicine.histories ?: emptyList()
             if (list.isNotEmpty()) {
                 items(list) { history ->
-                    HistoryItem(history = history)
+                    HistoryItem(history = history, medicine.name)
                 }
             }
 
@@ -159,7 +162,7 @@ fun SuccessContent(
 }
 
 @Composable
-fun HistoryItem(history: History) {
+fun HistoryItem(history: History, name : String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -167,9 +170,12 @@ fun HistoryItem(history: History) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = history.medicineId, fontWeight = FontWeight.Bold)
+            Text(text = "$name - ${history.medicineId}", fontWeight = FontWeight.Bold)
             Text(text = "User: ${history.userId}")
-            Text(text = "Date: ${history.timeStamp}")
+            val formattedDate = remember(history.timeStamp) {
+                SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(history.timeStamp))
+            }
+            Text(text = "Date: $formattedDate")
             Text(text = "Details: ${history.details}")
         }
     }
