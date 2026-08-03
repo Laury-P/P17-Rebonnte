@@ -1,6 +1,7 @@
 package com.openclassrooms.rebonnte.data.medecine
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.History
@@ -10,6 +11,7 @@ import com.openclassrooms.rebonnte.data.model.MedicineDto
 import com.openclassrooms.rebonnte.data.model.toDto
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
@@ -54,18 +56,23 @@ class FirebaseMedicineRepository @Inject constructor(
             }
     }
 
-    override fun getMedicineDetailById(medicineId: String): Flow<Medicine> =
-        flow {
-        val snapshot = firestore.collection("medicines").document(medicineId).get().await()
-        val entity = snapshot.toObject(MedicineDto::class.java) ?: return@flow
+    override fun getMedicineDetailById(medicineId: String): Flow<Medicine> {
+        val medicineRef = firestore.collection("medicines").document(medicineId)
 
-        val historySnapshot = firestore.collection("medicines")
-            .document(medicineId)
-            .collection("histories")
-            .get().await()
-        val histories = historySnapshot.toObjects(History::class.java)
+        val medicineFlow = medicineRef.snapshots().map { snapshot ->
+            snapshot.toObject(MedicineDto::class.java)
+        }
 
-        emit(entity.toDomain(histories))
+        val historyFlow = medicineRef.collection("histories")
+            .orderBy("timeStamp", Query.Direction.DESCENDING)
+            .snapshots()
+            .map { snapshot ->
+                snapshot.toObjects(History::class.java)
+            }
+
+        return combine(medicineFlow, historyFlow) { medicineDto, histories ->
+            medicineDto?.toDomain(histories) ?: throw Exception("Medicine not found")
+        }
     }
 
     override suspend fun addAisle(aisle: Aisle): Result<Unit> = runCatching {
