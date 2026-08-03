@@ -69,10 +69,9 @@ class MedicineViewModel @Inject constructor(
                 }
                 ListMedicinesState.Success(listMedicine = sortedList) as ListMedicinesState
             }.catch { error ->
-                ListMedicinesState.Error(error.message ?: "Error loading medicine")
+                emit(ListMedicinesState.Error(error.message ?: "Error loading medicine"))
             }
-        }.onStart { emit(ListMedicinesState.Loading) }
-        .stateIn(
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = ListMedicinesState.Loading
