@@ -5,5 +5,6 @@ data class Medicine(
     var name: String = "",
     var stock: Int = 0,
     var aisleId: String = "",
+    var aisleName: String = "",
     var histories: List<History>? = null
 )
