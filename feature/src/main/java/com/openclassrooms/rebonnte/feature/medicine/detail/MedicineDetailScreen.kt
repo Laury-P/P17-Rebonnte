@@ -18,6 +18,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -35,6 +37,7 @@ import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.domain.model.History
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.feature.destinations.MedicineScreenDestination
@@ -55,21 +58,40 @@ fun MedicineDetailScreen(
 
     val medicineState by viewModel.uiState.collectAsState()
 
+    val operationState by viewModel.operationState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(operationState) {
+        if(operationState is OperationState.Error){
+            val errorMessage = "Stock update failed: ${(operationState as OperationState.Error).error}"
+
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                withDismissAction = true
+            )
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { if (medicineState is UiState.Success) Text((medicineState as UiState.Success).medicine.name) }
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         when (medicineState) {
             is UiState.Success -> {
                 val medicine = (medicineState as UiState.Success).medicine
-                SuccessContent(medicine, modifier = Modifier.padding(innerPadding),
-                    addOne = { viewModel.updateStock(medicine, true) },
-                    removeOne = { viewModel.updateStock(medicine, false)
-                    }
-                )
+                Column {
+                    SuccessContent(medicine,
+                        modifier = Modifier.padding(innerPadding),
+                        addOne = { viewModel.updateStock(medicine, true) },
+                        removeOne = { viewModel.updateStock(medicine, false)},
+                        operationState = operationState
+                    )
+                }
+
             }
 
             is UiState.Loading -> LoadingComponent()
@@ -90,7 +112,8 @@ fun SuccessContent(
     medicine: Medicine,
     modifier: Modifier,
     addOne: () -> Unit,
-    removeOne: () -> Unit
+    removeOne: () -> Unit,
+    operationState : OperationState
 ) {
     Column(
         modifier = modifier
@@ -117,11 +140,10 @@ fun SuccessContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(onClick = {
-                if (medicine.stock > 0) {
-                    removeOne()
-                }
-            }, enabled = medicine.stock > 0) {
+            IconButton(
+                onClick = { removeOne() },
+                enabled = (medicine.stock > 0) && (operationState !is OperationState.Loading)
+            ) {
                 Icon(
                     imageVector = Icons.Filled.KeyboardArrowDown,
                     contentDescription = "Minus One"
@@ -134,9 +156,10 @@ fun SuccessContent(
                 readOnly = true,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = {
-                addOne()
-            }) {
+            IconButton(
+                onClick = { addOne() },
+                enabled = operationState !is OperationState.Loading
+            ) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowUp,
                     contentDescription = "Plus One"
@@ -152,11 +175,13 @@ fun SuccessContent(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             val list = medicine.histories ?: emptyList()
             if (list.isNotEmpty()) {
+                if(operationState is OperationState.Loading) {
+                    item { LoadingComponent() }
+                }
                 items(list) { history ->
                     HistoryItem(history = history, medicine.name)
                 }
             }
-
         }
     }
 }

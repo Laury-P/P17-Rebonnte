@@ -9,6 +9,8 @@ import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
 import com.openclassrooms.rebonnte.feature.medicine.useCase.NewMedicineUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,7 +33,6 @@ class MedicineViewModel @Inject constructor(
     val searchQuery: StateFlow<String> = _searchQuery
 
     private val _sortQuery = MutableStateFlow<SortQuery>(SortQuery.None)
-    val sortQuery: StateFlow<SortQuery> = _sortQuery
 
     private val refreshSignal = MutableSharedFlow<Unit>(replay = 1).apply {
         tryEmit(Unit)
@@ -48,6 +49,7 @@ class MedicineViewModel @Inject constructor(
     private val _operationState = MutableStateFlow<OperationState>(OperationState.Idle)
     val operationState : StateFlow<OperationState> = _operationState
 
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val uiState: StateFlow<ListMedicinesState> = refreshSignal
         .flatMapLatest {
             combine(

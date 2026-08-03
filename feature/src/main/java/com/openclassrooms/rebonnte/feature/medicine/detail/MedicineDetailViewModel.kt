@@ -1,10 +1,10 @@
 package com.openclassrooms.rebonnte.feature.medicine.detail
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
 import com.openclassrooms.rebonnte.feature.medicine.useCase.UpdateStockUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class MedicineDetailViewModel @Inject constructor(
@@ -27,6 +28,9 @@ class MedicineDetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val medicineId: String? = savedStateHandle["medicineId"]
+
+    private val _operationState = MutableStateFlow<OperationState>(OperationState.Idle)
+    val operationState = _operationState.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState : StateFlow<UiState> = if (medicineId != null) {
@@ -48,9 +52,10 @@ class MedicineDetailViewModel @Inject constructor(
 
     fun updateStock(medicine : Medicine, isIncrease : Boolean) {
         viewModelScope.launch {
+            _operationState.value = OperationState.Loading
             updateStockUseCase(medicine, isIncrease)
-                .onFailure { Log.d("DEBUG_UPDATE","Failed update: ${it.message}" ) }
-                .onSuccess { Log.d("DEBUG_UPDATE", "Success update") }
+                .onFailure { _operationState.value = OperationState.Error(it.message ?: "Unknown error") }
+                .onSuccess { _operationState.value = OperationState.Success }
         }
     }
 }

@@ -27,6 +27,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -45,6 +47,7 @@ import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.MedicineItem
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
+import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.feature.destinations.MedicineDetailScreenDestination
@@ -67,7 +70,22 @@ fun MedicineScreen(
 
     val aisles by viewModel.aisles.collectAsState()
 
+    val operationState by viewModel.operationState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(operationState) {
+        if(operationState is OperationState.Error) {
+            val errorMessage = "Adding new medicine failed : ${(operationState as OperationState.Error).error}"
+
+            snackbarHostState.showSnackbar(
+                message = errorMessage,
+                withDismissAction = true
+            )
+        }
+    }
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             Column {
                 TopAppBar(
@@ -184,6 +202,9 @@ fun MedicineScreen(
                         .fillMaxSize()
                         .padding(innerPadding)
                 ) {
+                    if(operationState is OperationState.Loading) {
+                        item { LoadingComponent() }
+                    }
                     items(medicines) { medicine ->
                         MedicineItem(medicine = medicine, onClick = {
                             navigator.navigate(MedicineDetailScreenDestination(medicine.medicineId))
