@@ -1,6 +1,5 @@
 package com.openclassrooms.rebonnte.data.user
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.openclassrooms.rebonnte.core.domain.model.User
 import com.openclassrooms.rebonnte.core.domain.repository.UserRepository
@@ -16,7 +15,6 @@ class FirebaseUserRepository @Inject constructor(private val firestore: Firebase
     }
 
     override suspend fun addUser(user: User): Result<Unit> = runCatching {
-        Log.d("Debug LOg", "Repo adduser called with: $user")
         firestore.collection("users").document(user.id).set(user).await()
     }
 
