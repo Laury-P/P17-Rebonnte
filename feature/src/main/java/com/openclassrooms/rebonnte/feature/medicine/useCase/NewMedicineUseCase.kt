@@ -11,7 +11,7 @@ class NewMedicineUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ){
     suspend operator fun invoke(name : String, aisleId:String, stock : Int) : Result<Unit> = runCatching {
-        val userId = authRepository.getUserId() ?: "unknown_user" // TODO gerer l'erreur d'authent
+        val userId = authRepository.getUserId() ?: throw(IllegalStateException("User not logged in"))
         val medicineId = medicineRepository.generateMedicineId()
 
         val initialHistory = History(

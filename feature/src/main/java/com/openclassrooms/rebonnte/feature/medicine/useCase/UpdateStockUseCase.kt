@@ -11,7 +11,7 @@ class UpdateStockUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ){
     suspend operator fun invoke(medicine : Medicine, isIncrease : Boolean) : Result<Unit> = runCatching{
-        val userId = authRepository.getUserId() ?: "unknown_user" // TODO gerer l'erreur authent
+        val userId = authRepository.getUserId() ?: throw(IllegalStateException("User not logged in"))
         val newStock = if(isIncrease) medicine.stock + 1 else (medicine.stock - 1).coerceAtLeast(0)
         val updateHistory = History(
             userId = userId,
