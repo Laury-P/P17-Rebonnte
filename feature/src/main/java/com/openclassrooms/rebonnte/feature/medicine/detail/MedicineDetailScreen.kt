@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
@@ -38,9 +39,12 @@ import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.domain.model.History
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
+import com.openclassrooms.rebonnte.feature.auth.AuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.feature.destinations.LogScreenDestination
 import com.ramcosta.composedestinations.generated.feature.destinations.MedicineScreenDestination
+import com.ramcosta.composedestinations.generated.feature.navgraphs.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
@@ -53,6 +57,7 @@ import java.util.Locale
 fun MedicineDetailScreen(
     medicineId: String,
     viewModel: MedicineDetailViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
 
@@ -75,7 +80,23 @@ fun MedicineDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { if (medicineState is UiState.Success) Text((medicineState as UiState.Success).medicine.name) }
+                title = { 
+                    if (medicineState is UiState.Success) {
+                        Text((medicineState as UiState.Success).medicine.name) 
+                    } else {
+                        Text("Medicine Detail")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        authViewModel.signOut()
+                        navigator.navigate(LogScreenDestination) {
+                            popUpTo(RootNavGraph) { inclusive = true }
+                        }
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign Out")
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }

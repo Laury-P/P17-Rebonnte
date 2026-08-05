@@ -10,11 +10,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -37,9 +39,12 @@ import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
+import com.openclassrooms.rebonnte.feature.auth.AuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.feature.destinations.AisleDetailScreenDestination
+import com.ramcosta.composedestinations.generated.feature.destinations.LogScreenDestination
+import com.ramcosta.composedestinations.generated.feature.navgraphs.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +53,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun AisleScreen(
     modifier: Modifier = Modifier,
     viewModel: AisleViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
 
@@ -75,7 +81,17 @@ fun AisleScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text(text = "Aisle") }
+                title = { Text(text = "Aisle") },
+                actions = {
+                    IconButton(onClick = {
+                        authViewModel.signOut()
+                        navigator.navigate(LogScreenDestination) {
+                            popUpTo(RootNavGraph) { inclusive = true }
+                        }
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign Out")
+                    }
+                }
             )
         },
         floatingActionButton = {

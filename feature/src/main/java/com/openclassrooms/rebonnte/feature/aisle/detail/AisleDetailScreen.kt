@@ -3,7 +3,11 @@ package com.openclassrooms.rebonnte.feature.aisle.detail
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -16,10 +20,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.MedicineItem
+import com.openclassrooms.rebonnte.feature.auth.AuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.feature.destinations.AisleScreenDestination
+import com.ramcosta.composedestinations.generated.feature.destinations.LogScreenDestination
 import com.ramcosta.composedestinations.generated.feature.destinations.MedicineDetailScreenDestination
+import com.ramcosta.composedestinations.generated.feature.navgraphs.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.delay
 
@@ -29,17 +36,32 @@ import kotlinx.coroutines.delay
 fun AisleDetailScreen(
     aisleId: String,
     viewModel: AisleDetailViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
     navigator: DestinationsNavigator) {
 
     val state by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
-            if (state is UiState.Success) {
-                TopAppBar(
-                    title = { Text((state as UiState.Success).aisle.name) }
-                )
-            }
+            TopAppBar(
+                title = {
+                    if (state is UiState.Success) {
+                        Text((state as UiState.Success).aisle.name)
+                    } else {
+                        Text("Aisle Detail")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        authViewModel.signOut()
+                        navigator.navigate(LogScreenDestination) {
+                            popUpTo(RootNavGraph) { inclusive = true }
+                        }
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign Out")
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         when (state) {
