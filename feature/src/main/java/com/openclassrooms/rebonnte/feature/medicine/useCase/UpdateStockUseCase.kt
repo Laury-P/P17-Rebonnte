@@ -22,6 +22,6 @@ class UpdateStockUseCase @Inject constructor(
 
         val updatedMedicine = medicine.copy(stock = newStock)
 
-        medicineRepository.saveMedicine(medicine = updatedMedicine, history = updateHistory)
+        medicineRepository.saveMedicine(medicine = updatedMedicine, history = updateHistory).getOrThrow()
     }
 }

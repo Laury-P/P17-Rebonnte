@@ -28,6 +28,6 @@ class NewMedicineUseCase @Inject constructor(
             aisleId = aisleId
         )
 
-        medicineRepository.saveMedicine(medicine = newMedicine, history = initialHistory)
+        medicineRepository.saveMedicine(medicine = newMedicine, history = initialHistory).getOrThrow()
     }
 }
