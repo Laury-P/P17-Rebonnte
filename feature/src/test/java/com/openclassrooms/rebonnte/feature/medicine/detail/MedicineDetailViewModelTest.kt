@@ -2,10 +2,9 @@ package com.openclassrooms.rebonnte.feature.medicine.detail
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
-import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
-import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.feature.medicine.useCase.GetMedicineDetailUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.UpdateStockUseCase
 import com.openclassrooms.rebonnte.feature.utils.MainDispatcherExtension
 import io.mockk.coEvery
@@ -24,24 +23,21 @@ import org.junit.jupiter.api.extension.ExtendWith
 @ExtendWith(MainDispatcherExtension::class)
 class MedicineDetailViewModelTest {
 
-    private val repository = mockk<MedicineRepository>()
+    private val getMedicineDetailUseCase = mockk<GetMedicineDetailUseCase>()
     private val updateStockUseCase = mockk<UpdateStockUseCase>()
     private val medicineId = "med_1"
 
     private fun createViewModel(id: String? = medicineId): MedicineDetailViewModel {
         val savedStateHandle = if (id != null) SavedStateHandle(mapOf("medicineId" to id))
         else SavedStateHandle()
-        return MedicineDetailViewModel(repository, savedStateHandle, updateStockUseCase)
+        return MedicineDetailViewModel(getMedicineDetailUseCase, savedStateHandle, updateStockUseCase)
     }
 
     @Test
-    fun `should emit Success with enriched aisle name when ID is valid`() = runTest {
+    fun `should emit Success when use case returns medicine`() = runTest {
         // Given
-        val medicine = Medicine(medicineId = medicineId, name = "Doliprane", aisleId = "A1")
-        val aisle = Aisle(aisleId = "A1", name = "Cardiologie")
-
-        every { repository.getMedicineDetailById(medicineId) } returns flowOf(medicine)
-        every { repository.getAisleNameById("A1") } returns flowOf(aisle)
+        val medicine = Medicine(medicineId = medicineId, name = "Doliprane", aisleName = "Cardiologie")
+        every { getMedicineDetailUseCase(medicineId) } returns flowOf(medicine)
 
         // When
         val viewModel = createViewModel()
@@ -68,9 +64,9 @@ class MedicineDetailViewModelTest {
     }
 
     @Test
-    fun `should emit Error when repository throws exception`() = runTest {
+    fun `should emit Error when use case throws exception`() = runTest {
         // Given
-        every { repository.getMedicineDetailById(medicineId) } returns flow { throw Exception("Network Fail") }
+        every { getMedicineDetailUseCase(medicineId) } returns flow { throw Exception("Network Fail") }
 
         // When
         val viewModel = createViewModel()
@@ -88,8 +84,7 @@ class MedicineDetailViewModelTest {
         // Given
         val medicine = Medicine(medicineId = medicineId, name = "Doliprane")
         coEvery { updateStockUseCase(any(), any()) } returns Result.success(Unit)
-        every { repository.getMedicineDetailById(medicineId) } returns flowOf(medicine)
-        every { repository.getAisleNameById(any()) } returns flowOf(Aisle("A1", "Test"))
+        every { getMedicineDetailUseCase(medicineId) } returns flowOf(medicine)
 
         val viewModel = createViewModel()
 
@@ -112,8 +107,7 @@ class MedicineDetailViewModelTest {
         val medicine = Medicine(medicineId = medicineId, name = "Doliprane")
         val errorMsg = "Update failed"
         coEvery { updateStockUseCase(any(), any()) } returns Result.failure(Exception(errorMsg))
-        every { repository.getMedicineDetailById(medicineId) } returns flowOf(medicine)
-        every { repository.getAisleNameById(any()) } returns flowOf(Aisle("A1", "Test"))
+        every { getMedicineDetailUseCase(medicineId) } returns flowOf(medicine)
 
         val viewModel = createViewModel()
 
