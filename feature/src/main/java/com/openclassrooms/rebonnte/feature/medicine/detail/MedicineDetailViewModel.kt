@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
-import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.feature.medicine.useCase.GetMedicineDetailUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.UpdateStockUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -22,7 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @HiltViewModel
 class MedicineDetailViewModel @Inject constructor(
-    private val medicineRepository: MedicineRepository,
+    getMedicineDetailUseCase: GetMedicineDetailUseCase,
     savedStateHandle: SavedStateHandle,
     private val updateStockUseCase: UpdateStockUseCase
 ) : ViewModel() {
@@ -34,11 +33,9 @@ class MedicineDetailViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState : StateFlow<UiState> = if (medicineId != null) {
-        medicineRepository.getMedicineDetailById(medicineId)
-            .flatMapLatest { medicine ->
-                medicineRepository.getAisleNameById(medicine.aisleId).map { aisle ->
-                    UiState.Success(medicine.copy(aisleName = aisle.name)) as UiState
-                }
+        getMedicineDetailUseCase(medicineId)
+            .map { medicine ->
+                UiState.Success(medicine) as UiState
             }
             .catch { emit(UiState.Error(it.message ?: "Unknown error")) }
             .stateIn(
