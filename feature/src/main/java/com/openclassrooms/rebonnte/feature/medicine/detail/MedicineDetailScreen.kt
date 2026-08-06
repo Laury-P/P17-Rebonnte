@@ -217,7 +217,8 @@ fun HistoryItem(history: History, name : String) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "$name - ${history.medicineId}", fontWeight = FontWeight.Bold)
-            Text(text = "User: ${history.userId}")
+            val userDisplay = if (history.user != null) "${history.user!!.name} - ${history.user!!.email}" else history.userId
+            Text(text = "User: $userDisplay")
             val formattedDate = remember(history.timeStamp) {
                 SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(history.timeStamp))
             }
