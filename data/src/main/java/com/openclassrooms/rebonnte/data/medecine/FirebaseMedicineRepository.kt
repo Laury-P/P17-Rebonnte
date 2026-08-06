@@ -7,6 +7,7 @@ import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.History
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.data.model.HistoryDto
 import com.openclassrooms.rebonnte.data.model.MedicineDto
 import com.openclassrooms.rebonnte.data.model.toDto
 import jakarta.inject.Inject
@@ -67,7 +68,7 @@ class FirebaseMedicineRepository @Inject constructor(
             .orderBy("timeStamp", Query.Direction.DESCENDING)
             .snapshots()
             .map { snapshot ->
-                snapshot.toObjects(History::class.java)
+                snapshot.toObjects(HistoryDto::class.java).map { it.toDomain() }
             }
 
         return combine(medicineFlow, historyFlow) { medicineDto, histories ->
@@ -86,7 +87,7 @@ class FirebaseMedicineRepository @Inject constructor(
         batch.set(medicineRef, medicine.toDto())
 
         val historyRef = medicineRef.collection("histories").document()
-        batch.set(historyRef, history)
+        batch.set(historyRef, history.toDto())
 
         batch.commit().await()
     }

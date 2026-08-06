@@ -1,6 +1,6 @@
 package com.openclassrooms.rebonnte.data.di
 
-import com.firebase.ui.auth.FirebaseAuthUI
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
@@ -14,8 +14,8 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideAuthUi() : FirebaseAuthUI {
-        return FirebaseAuthUI.getInstance()
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
     }
 
     @Provides

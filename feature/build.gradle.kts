@@ -65,6 +65,9 @@ dependencies {
     ksp(libs.compose.destinations.ksp)
     implementation(libs.hilt.navigation.compose)
 
+    // FIREBASE AUTH
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
 
     // Hilt
     implementation(libs.hilt.android)

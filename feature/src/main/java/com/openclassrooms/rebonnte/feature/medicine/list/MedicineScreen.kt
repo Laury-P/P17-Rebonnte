@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Close
@@ -48,9 +49,12 @@ import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.MedicineItem
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
+import com.openclassrooms.rebonnte.feature.auth.AuthViewModel
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.feature.destinations.LogScreenDestination
 import com.ramcosta.composedestinations.generated.feature.destinations.MedicineDetailScreenDestination
+import com.ramcosta.composedestinations.generated.feature.navgraphs.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +62,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 @Composable
 fun MedicineScreen(
     viewModel: MedicineViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
     val medicinesState by viewModel.uiState.collectAsState()
@@ -91,6 +96,14 @@ fun MedicineScreen(
                 TopAppBar(
                     title = { Text(text = "Medicines") },
                     actions = {
+                        IconButton(onClick = {
+                            authViewModel.signOut()
+                            navigator.navigate(LogScreenDestination) {
+                                popUpTo(RootNavGraph) { inclusive = true }
+                            }
+                        }) {
+                            Icon(Icons.AutoMirrored.Rounded.Logout, contentDescription = "Sign Out")
+                        }
                         var expanded by remember { mutableStateOf(false) }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

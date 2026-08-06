@@ -1,8 +1,9 @@
 package com.openclassrooms.rebonnte.core.domain.model
 
-class History(
-    var medicineId: String = "",
-    var userId: String = "",
-    var timeStamp: Long = 0,
-    var details: String = ""
+data class History(
+    val medicineId: String = "",
+    val userId: String = "",
+    val user: User? = null,
+    val timeStamp: Long = 0,
+    val details: String = ""
 )
