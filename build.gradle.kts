@@ -6,9 +6,38 @@ plugins {
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
-    // alias(libs.plugins.sonarqube)
+    alias(libs.plugins.sonarqube)
     jacoco
 }
+
+// Global filter for Jacoco and Sonar
+val jacocoExcludes = listOf(
+    // Android-specific generated files
+    "**/R.class",
+    "**/R$*.class",
+    "**/BuildConfig.*",
+    "**/Manifest*.*",
+
+    // Hilt & Dagger Generated
+    "**/hilt_aggregated_deps/**",
+    "**/dagger/hilt/internal/**",
+    "**/dagger/hilt/android/internal/**",
+    "**/*_MembersInjector.class",
+    "**/Dagger*Component.class",
+    "**/*Module_*Factory.class",
+    "**/*_Factory.class",
+    "**/*_Provide*Factory.class",
+    "**/*_HiltModules*.*",
+
+    // Compose & UI Generated
+    "**/*Preview*.*",
+    "**/*ComposableSingletons*.*",
+
+    // Compose Destinations
+    "**/destinations/**",
+    "**/*Destination.class",
+    "**/*NavGraph.class"
+)
 
 // ===============================
 // Jacoco Report Task
@@ -16,34 +45,6 @@ plugins {
 tasks.register<JacocoReport>("jacocoFullReport") {
     group = "Reports"
     description = "Generate JaCoCo coverage reports (Unit + Instrumented) for all modules"
-
-    val fileFilter = listOf(
-        // Android-specific generated files
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-
-        // Hilt & Dagger Generated
-        "**/hilt_aggregated_deps/**",
-        "**/dagger/hilt/internal/**",
-        "**/dagger/hilt/android/internal/**",
-        "**/*_MembersInjector.class",
-        "**/Dagger*Component.class",
-        "**/*Module_*Factory.class",
-        "**/*_Factory.class",
-        "**/*_Provide*Factory.class",
-        "**/*_HiltModules*.*",
-
-        // Compose & UI Generated
-        "**/*Preview*.*",
-        "**/*ComposableSingletons*.*",
-
-        // Compose Destinations
-        "**/destinations/**",
-        "**/*Destination.class",
-        "**/*NavGraph.class"
-    )
 
     val javaClasses = mutableListOf<FileTree>()
     val kotlinClasses = mutableListOf<FileTree>()
@@ -59,23 +60,21 @@ tasks.register<JacocoReport>("jacocoFullReport") {
         val javaDir = File(buildDir, "intermediates/javac/debug/compileDebugJavaWithJavac/classes")
 
         if (transformedDir.exists()) {
-            // Version finale (recommandé pour Hilt)
             javaClasses.add(proj.fileTree(transformedDir) {
                 include("com/openclassrooms/rebonnte/**")
-                exclude(fileFilter)
+                exclude(jacocoExcludes)
             })
         } else {
-            // Fallback si pas de transformation
             if (kotlinDir.exists()) {
                 javaClasses.add(proj.fileTree(kotlinDir) {
                     include("com/openclassrooms/rebonnte/**")
-                    exclude(fileFilter)
+                    exclude(jacocoExcludes)
                 })
             }
             if (javaDir.exists()) {
                 javaClasses.add(proj.fileTree(javaDir) {
                     include("com/openclassrooms/rebonnte/**")
-                    exclude(fileFilter)
+                    exclude(jacocoExcludes)
                 })
             }
         }
@@ -155,15 +154,36 @@ tasks.register("runAllCoverageAndReport") {
     }
 }
 
-/*
+// ===========================
+// Sonar Analysis
+// ===========================
 sonar {
     properties {
-        property("sonar.projectKey", "rebonnte")
+        property("sonar.organization", "laury-p")
+        property("sonar.projectKey", "Laury-P_P17-Rebonnte")
         property("sonar.projectName", "rebonnte")
         property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.coverage.jacoco.xmlReportPaths", "${layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml")
-        property("sonar.kotlin.binaries", "${layout.buildDirectory.get().asFile.absolutePath}/tmp/kotlin-classes/debug")
-        property("sonar.exclusions", jacocoExcludes.joinToString(","))
+
+        // On définit le rapport de couverture au niveau global
+        val reportPath = "${layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+        property("sonar.coverage.jacoco.xmlReportPaths", reportPath)
+
+        val binaryExclusions = listOf("**/*.webp", "**/*.png", "**/*.jpg", "**/*.svg")
+        property("sonar.exclusions", (jacocoExcludes + binaryExclusions).joinToString(","))
+
+        // Le token est récupéré ici, mais s'il est vide, la tâche échouera (c'est normal en local sans config)
+        val sonarToken = System.getenv("SONAR_TOKEN") ?: ""
+        if (sonarToken.isNotEmpty()) {
+            property("sonar.token", sonarToken)
+        }
     }
 }
-*/
+
+subprojects {
+    // On laisse le plugin Sonar détecter automatiquement les sources Android
+}
+
+tasks.named("sonar") {
+    // Sonar a besoin que le rapport Jacoco existe AVANT de se lancer
+    dependsOn("runAllCoverageAndReport")
+}
