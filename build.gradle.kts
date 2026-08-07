@@ -87,11 +87,12 @@ tasks.register<JacocoReport>("jacocoFullReport") {
         val sDirKotlin = File(proj.projectDir, "src/main/kotlin")
         if (sDirKotlin.exists()) sourceDirs.add(sDirKotlin)
 
-        // Données d'exécution
+        // Données d'exécution (Unitaires + Instrumentés)
         executionDataFiles.add(proj.fileTree(buildDir) {
             include(
                 "jacoco/*.exec",
-                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec"
+                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+                "outputs/code_coverage/debugAndroidTest/connected/**/*.ec"
             )
         })
     }
@@ -124,19 +125,19 @@ tasks.register("runAllCoverageAndReport") {
     val testTaskPaths = mutableListOf<String>()
 
     rootProject.subprojects.forEach { proj ->
-        // Vérifie si le dossier de tests unitaires existe
+        // Vérifie si le dossier de tests unitaires existe et contient des fichiers
         val hasUnitTests = File(proj.projectDir, "src/test").exists()
         if (hasUnitTests) {
             testTaskPaths.add("${proj.path}:testDebugUnitTest")
         }
 
-        // Vérifie si le dossier de tests d'intégration existe
-        /*
-        val hasAndroidTests = File(proj.projectDir, "src/androidTest").exists()
+        // Vérifie si le dossier de tests d'intégration existe et n'est pas vide
+        val androidTestDir = File(proj.projectDir, "src/androidTest")
+        val hasAndroidTests = androidTestDir.exists() && androidTestDir.walk().any { it.isFile && (it.extension == "kt" || it.extension == "java") }
+        
         if (hasAndroidTests) {
             testTaskPaths.add("${proj.path}:connectedDebugAndroidTest")
         }
-        */
     }
 
     dependsOn(testTaskPaths)
@@ -146,9 +147,9 @@ tasks.register("runAllCoverageAndReport") {
 
     doFirst {
         if (testTaskPaths.isEmpty()) {
-            println("⚠️ Aucun dossier de test détecté dans les sous-projets.")
+            println("⚠️ Aucun test détecté.")
         } else {
-            println("🚀 Lancement des tâches de test détectées :")
+            println("🚀 Lancement des tests détectés (Unit + UI) :")
             testTaskPaths.forEach { println(" - $it") }
         }
     }
