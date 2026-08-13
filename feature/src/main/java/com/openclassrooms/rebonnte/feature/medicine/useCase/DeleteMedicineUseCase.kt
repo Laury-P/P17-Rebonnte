@@ -7,6 +7,6 @@ class DeleteMedicineUseCase @Inject constructor(
     private val medicineRepository: MedicineRepository
 ) {
     suspend operator fun invoke(medicineId : String) : Result<Unit> = runCatching {
-        medicineRepository.deleteMedicine(medicineId)
+        medicineRepository.deleteMedicine(medicineId).getOrThrow()
     }
 }

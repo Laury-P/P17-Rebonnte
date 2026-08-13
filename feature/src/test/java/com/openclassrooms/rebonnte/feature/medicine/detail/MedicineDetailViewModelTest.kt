@@ -6,6 +6,7 @@ import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.feature.medicine.useCase.GetMedicineDetailUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.UpdateStockUseCase
+import com.openclassrooms.rebonnte.feature.medicine.useCase.DeleteMedicineUseCase
 import com.openclassrooms.rebonnte.feature.utils.MainDispatcherExtension
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -25,12 +26,18 @@ class MedicineDetailViewModelTest {
 
     private val getMedicineDetailUseCase = mockk<GetMedicineDetailUseCase>()
     private val updateStockUseCase = mockk<UpdateStockUseCase>()
+    private val deleteMedicineUseCase = mockk<DeleteMedicineUseCase>()
     private val medicineId = "med_1"
 
     private fun createViewModel(id: String? = medicineId): MedicineDetailViewModel {
         val savedStateHandle = if (id != null) SavedStateHandle(mapOf("medicineId" to id))
         else SavedStateHandle()
-        return MedicineDetailViewModel(getMedicineDetailUseCase, savedStateHandle, updateStockUseCase)
+        return MedicineDetailViewModel(
+            getMedicineDetailUseCase, 
+            savedStateHandle, 
+            updateStockUseCase,
+            deleteMedicineUseCase
+        )
     }
 
     @Test
@@ -123,5 +130,49 @@ class MedicineDetailViewModelTest {
         }
 
         coVerify { updateStockUseCase(medicine, isIncrease = false) }
+    }
+
+    @Test
+    fun `deleteMedicine should update deleteState to Success on success`() = runTest {
+        // Given
+        coEvery { deleteMedicineUseCase(medicineId) } returns Result.success(Unit)
+        every { getMedicineDetailUseCase(medicineId) } returns flowOf(mockk())
+
+        val viewModel = createViewModel()
+
+        viewModel.deleteState.test {
+            assertEquals(OperationState.Idle, awaitItem())
+
+            // When
+            viewModel.deleteMedicine()
+
+            assertEquals(OperationState.Loading, awaitItem())
+            assertEquals(OperationState.Success, awaitItem())
+        }
+
+        coVerify { deleteMedicineUseCase(medicineId) }
+    }
+
+    @Test
+    fun `deleteMedicine should update deleteState to Error on failure`() = runTest {
+        // Given
+        val errorMsg = "Delete failed"
+        coEvery { deleteMedicineUseCase(medicineId) } returns Result.failure(Exception(errorMsg))
+        every { getMedicineDetailUseCase(medicineId) } returns flowOf(mockk())
+
+        val viewModel = createViewModel()
+
+        viewModel.deleteState.test {
+            assertEquals(OperationState.Idle, awaitItem())
+
+            // When
+            viewModel.deleteMedicine()
+
+            assertEquals(OperationState.Loading, awaitItem())
+            val state = awaitItem() as OperationState.Error
+            assertEquals(errorMsg, state.error)
+        }
+
+        coVerify { deleteMedicineUseCase(medicineId) }
     }
 }
