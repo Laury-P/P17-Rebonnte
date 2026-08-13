@@ -88,7 +88,7 @@ class MedicineDetailViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.operationState.test {
+        viewModel.updateState.test {
             assertEquals(OperationState.Idle, awaitItem())
 
             // When
@@ -111,7 +111,7 @@ class MedicineDetailViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.operationState.test {
+        viewModel.updateState.test {
             assertEquals(OperationState.Idle, awaitItem())
 
             // When
