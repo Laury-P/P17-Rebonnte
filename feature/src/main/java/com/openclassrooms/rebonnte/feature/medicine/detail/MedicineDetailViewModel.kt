@@ -7,6 +7,7 @@ import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.feature.medicine.useCase.GetMedicineDetailUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.UpdateStockUseCase
+import com.openclassrooms.rebonnte.feature.medicine.useCase.DeleteMedicineUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,13 +24,17 @@ import kotlinx.coroutines.flow.asStateFlow
 class MedicineDetailViewModel @Inject constructor(
     getMedicineDetailUseCase: GetMedicineDetailUseCase,
     savedStateHandle: SavedStateHandle,
-    private val updateStockUseCase: UpdateStockUseCase
+    private val updateStockUseCase: UpdateStockUseCase,
+    private val deleteMedicineUseCase: DeleteMedicineUseCase
 ) : ViewModel() {
 
     private val medicineId: String? = savedStateHandle["medicineId"]
 
-    private val _operationState = MutableStateFlow<OperationState>(OperationState.Idle)
-    val operationState = _operationState.asStateFlow()
+    private val _updateState = MutableStateFlow<OperationState>(OperationState.Idle)
+    val updateState = _updateState.asStateFlow()
+
+    private val _deleteState = MutableStateFlow<OperationState>(OperationState.Idle)
+    val deleteState = _deleteState.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState : StateFlow<UiState> = if (medicineId != null) {
@@ -48,11 +53,23 @@ class MedicineDetailViewModel @Inject constructor(
     }
 
     fun updateStock(medicine : Medicine, isIncrease : Boolean) {
+        _updateState.value = OperationState.Loading
         viewModelScope.launch {
-            _operationState.value = OperationState.Loading
             updateStockUseCase(medicine, isIncrease)
-                .onFailure { _operationState.value = OperationState.Error(it.message ?: "Unknown error") }
-                .onSuccess { _operationState.value = OperationState.Success }
+                .onFailure { _updateState.value = OperationState.Error(it.message ?: "Unknown error") }
+                .onSuccess { _updateState.value = OperationState.Success }
+        }
+    }
+
+    fun deleteMedicine() {
+        _deleteState.value = OperationState.Loading
+        viewModelScope.launch {
+            medicineId?.let { id ->
+
+                deleteMedicineUseCase(id)
+                    .onFailure { _deleteState.value = OperationState.Error(it.message ?: "Unknown error while deleting") }
+                    .onSuccess { _deleteState.value = OperationState.Success }
+            }
         }
     }
 }
