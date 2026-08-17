@@ -57,14 +57,6 @@ import com.openclassrooms.rebonnte.feature.R
 @Composable
 fun LogScreen(navigator: DestinationsNavigator, viewModel: LogViewModel = hiltViewModel()) {
     val operationState by viewModel.operationState.collectAsState()
-    val focusManager = LocalFocusManager.current
-    val scrollState = rememberScrollState()
-
-    var isLoginMode by remember { mutableStateOf(true) }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(operationState) {
         if (operationState is OperationState.Success) {
@@ -73,6 +65,28 @@ fun LogScreen(navigator: DestinationsNavigator, viewModel: LogViewModel = hiltVi
             }
         }
     }
+
+    LogContent(
+        operationState = operationState,
+        onSignIn = { email, password -> viewModel.signIn(email, password) },
+        onSignUp = { email, password, name -> viewModel.signUp(email, password, name) }
+    )
+}
+
+@Composable
+fun LogContent(
+    operationState: OperationState,
+    onSignIn: (String, String) -> Unit,
+    onSignUp: (String, String, String) -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+    val scrollState = rememberScrollState()
+
+    var isLoginMode by remember { mutableStateOf(true) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Scaffold { innerPadding ->
         Column(
@@ -150,9 +164,9 @@ fun LogScreen(navigator: DestinationsNavigator, viewModel: LogViewModel = hiltVi
                     onDone = {
                         if (email.isNotBlank() && password.isNotBlank() && (isLoginMode || name.isNotBlank())) {
                             if (isLoginMode) {
-                                viewModel.signIn(email, password)
+                                onSignIn(email, password)
                             } else {
-                                viewModel.signUp(email, password, name)
+                                onSignUp(email, password, name)
                             }
                             focusManager.clearFocus()
                         }
@@ -173,9 +187,9 @@ fun LogScreen(navigator: DestinationsNavigator, viewModel: LogViewModel = hiltVi
                 Button(
                     onClick = {
                         if (isLoginMode) {
-                            viewModel.signIn(email, password)
+                            onSignIn(email, password)
                         } else {
-                            viewModel.signUp(email, password, name)
+                            onSignUp(email, password, name)
                         }
                         focusManager.clearFocus()
                     },
