@@ -1,0 +1,20 @@
+<resources>
+    <!-- Screen Login/Signup -->
+    <string name="auth_login_title">Connexion</string>
+    <string name="auth_signup_title">Inscription</string>
+    <string name="auth_name_label">Nom complet</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Mot de passe</string>
+    <string name="auth_password_hide">Cacher le mot de passe</string>
+    <string name="auth_password_show">Afficher le mot de passe</string>
+    <string name="auth_loading_desc">Chargement en cours</string>
+    <string name="auth_login_button">Se connecter</string>
+    <string name="auth_signup_button">S\'inscrire</string>
+    <string name="auth_no_account">Pas de compte ? S\'inscrire</string>
+    <string name="auth_already_account">Déjà un compte ? Se connecter</string>
+
+    <!-- Errors -->
+    <string name="error_login">Erreur de connexion</string>
+    <string name="error_user_save">Erreur lors de l\'enregistrement utilisateur</string>
+    <string name="error_signup">Erreur lors de l\'inscription</string>
+</resources>

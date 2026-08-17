@@ -5,9 +5,11 @@ import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.model.User
 import com.openclassrooms.rebonnte.core.domain.repository.AuthRepository
 import com.openclassrooms.rebonnte.core.domain.repository.UserRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
 import com.openclassrooms.rebonnte.feature.utils.MainDispatcherExtension
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -21,7 +23,10 @@ class LogViewModelTest {
 
     private val authRepository = mockk<AuthRepository>()
     private val userRepository = mockk<UserRepository>()
-    private val viewModel = LogViewModel(authRepository, userRepository)
+    private val stringProvider = mockk<StringProvider> {
+        every { getString(any()) } returns "Localized Error"
+    }
+    private val viewModel = LogViewModel(authRepository, userRepository, stringProvider)
 
     @Test
     fun `signIn should emit Success when authRepository returns success`() = runTest {
