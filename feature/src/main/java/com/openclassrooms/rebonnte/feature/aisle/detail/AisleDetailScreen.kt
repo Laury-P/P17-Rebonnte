@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
+import com.openclassrooms.rebonnte.core.designsystem.common.MedicineItem
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.feature.R
 import com.ramcosta.composedestinations.annotation.Destination
@@ -127,9 +128,10 @@ fun AisleDetailContent(
                             }
                         } else {
                             items(uiState.medicines, key = { it.medicineId }) { medicine ->
-                                MedicineItemCard(
+                                MedicineItem(
                                     medicine = medicine,
-                                    onClick = { onMedicineClick(medicine.medicineId) }
+                                    onClick = { onMedicineClick(medicine.medicineId) },
+                                    onClickLabel = stringResource(R.string.aisle_detail_medicine_click_label, medicine.name)
                                 )
                             }
                         }
@@ -157,46 +159,4 @@ fun AisleDetailContent(
     }
 }
 
-@Composable
-fun MedicineItemCard(
-    medicine: Medicine,
-    onClick: () -> Unit
-) {
-    val clickLabel = stringResource(R.string.aisle_detail_medicine_click_label, medicine.name)
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(
-                onClick = onClick,
-                onClickLabel = clickLabel
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = medicine.name,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Text(
-                    text = "Stock: ${medicine.stock}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (medicine.stock <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
+
