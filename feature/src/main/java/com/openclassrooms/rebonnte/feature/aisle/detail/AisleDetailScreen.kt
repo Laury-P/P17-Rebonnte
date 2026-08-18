@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -89,7 +90,9 @@ fun AisleDetailContent(
                     val title = if (uiState is UiState.Success) uiState.aisle.name else titleDefault
                     Text(
                         text = title,
-                        modifier = Modifier.semantics { heading() }
+                        modifier = Modifier
+                            .testTag("aisle_detail_title")
+                            .semantics { heading() }
                     )
                 },
                 navigationIcon = {
