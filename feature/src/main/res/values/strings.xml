@@ -17,4 +17,16 @@
     <string name="error_login">Erreur de connexion</string>
     <string name="error_user_save">Erreur lors de l\'enregistrement utilisateur</string>
     <string name="error_signup">Erreur lors de l\'inscription</string>
+
+    <!-- Aisle Screen -->
+    <string name="aisle_title">Rayons</string>
+    <string name="aisle_logout_description">Se déconnecter</string>
+    <string name="aisle_add_description">Ajouter un nouveau rayon</string>
+    <string name="aisle_new_dialog_title">Nouveau rayon</string>
+    <string name="aisle_new_label">Nom du rayon</string>
+    <string name="aisle_save">Enregistrer</string>
+    <string name="aisle_cancel">Annuler</string>
+    <string name="aisle_empty">Aucun rayon pour le moment</string>
+    <string name="aisle_error_prefix">Erreur : %1$s</string>
+    <string name="aisle_item_click_label">Ouvrir le rayon %1$s</string>
 </resources>
