@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
 import com.openclassrooms.rebonnte.feature.utils.MainDispatcherExtension
 import io.mockk.every
 import io.mockk.mockk
@@ -19,18 +20,21 @@ import org.junit.jupiter.api.extension.ExtendWith
 class AisleDetailViewModelTest {
 
     private val repository = mockk<MedicineRepository>()
+    private val stringProvider = mockk<StringProvider> {
+        every { getString(any()) } returns "Localized Error"
+    }
     private val aisleId = "aisle_1"
 
     private fun createViewModel(id: String? = aisleId): AisleDetailViewModel {
         val savedStateHandle = if (id != null) SavedStateHandle(mapOf("aisleId" to id)) 
                                else SavedStateHandle()
-        return AisleDetailViewModel(repository, savedStateHandle)
+        return AisleDetailViewModel(repository, savedStateHandle, stringProvider)
     }
 
     @Test
     fun `should emit Success with combined data when ID is valid`() = runTest {
         // Given
-        val targetAisle = Aisle(aisleId, "Cardio")
+        val targetAisle = Aisle(name = "Cardio", aisleId = aisleId)
         val medicines = listOf(Medicine("med1", "Doliprane", aisleId = aisleId))
         
         every { repository.getAisleNameById(aisleId) } returns flowOf(targetAisle)
@@ -56,7 +60,7 @@ class AisleDetailViewModelTest {
         // Then
         viewModel.uiState.test {
             val state = awaitItem() as UiState.Error
-            assertEquals("ID de rayon manquant", state.error)
+            assertEquals("Localized Error", state.error)
         }
     }
 
