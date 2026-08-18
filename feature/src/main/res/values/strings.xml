@@ -17,6 +17,9 @@
     <string name="error_login">Erreur de connexion</string>
     <string name="error_user_save">Erreur lors de l\'enregistrement utilisateur</string>
     <string name="error_signup">Erreur lors de l\'inscription</string>
+    <string name="error_unknown">Une erreur inconnue est survenue</string>
+    <string name="error_aisle_id_missing">ID de rayon manquant</string>
+    <string name="error_aisle_add_failed">Le rayon n\'a pas pu être ajouté</string>
 
     <!-- Aisle Screen -->
     <string name="aisle_title">Rayons</string>
@@ -29,4 +32,11 @@
     <string name="aisle_empty">Aucun rayon pour le moment</string>
     <string name="aisle_error_prefix">Erreur : %1$s</string>
     <string name="aisle_item_click_label">Ouvrir le rayon %1$s</string>
+
+    <!-- Aisle Detail Screen -->
+    <string name="aisle_detail_title_default">Détail du rayon</string>
+    <string name="aisle_back_description">Retourner à la liste</string>
+    <string name="aisle_detail_empty">Aucun médicament dans ce rayon</string>
+    <string name="aisle_detail_error_redirect">%1$s. \nVous allez être redirigé vers la liste.</string>
+    <string name="aisle_detail_medicine_click_label">Voir les détails de %1$s</string>
 </resources>
