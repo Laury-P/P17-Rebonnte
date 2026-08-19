@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.domain.model.History
@@ -28,7 +29,6 @@ import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.feature.R
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.feature.destinations.MedicineScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,9 +44,9 @@ fun MedicineDetailScreen(
     viewModel: MedicineDetailViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
-    val medicineState by viewModel.uiState.collectAsState()
-    val updateState by viewModel.updateState.collectAsState()
-    val deleteState by viewModel.deleteState.collectAsState()
+    val medicineState by viewModel.uiState.collectAsStateWithLifecycle()
+    val updateState by viewModel.updateState.collectAsStateWithLifecycle()
+    val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     val deleteSuccessMsg = stringResource(R.string.medicine_detail_delete_success)
@@ -54,7 +54,7 @@ fun MedicineDetailScreen(
     LaunchedEffect(deleteState) {
         if (deleteState is OperationState.Success) {
             Toast.makeText(context, deleteSuccessMsg, Toast.LENGTH_SHORT).show()
-            navigator.navigate(MedicineScreenDestination)
+            navigator.navigateUp()
         }
     }
 

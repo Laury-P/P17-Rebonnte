@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.openclassrooms.rebonnte.core.designsystem.common.AisleSelectorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
@@ -46,10 +47,10 @@ fun MedicineScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     navigator: DestinationsNavigator,
 ) {
-    val medicinesState by viewModel.uiState.collectAsState()
-    val searchQuery by viewModel.searchQuery.collectAsState()
-    val aisles by viewModel.aisles.collectAsState()
-    val operationState by viewModel.operationState.collectAsState()
+    val medicinesState by viewModel.uiState.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val aisles by viewModel.aisles.collectAsStateWithLifecycle()
+    val operationState by viewModel.operationState.collectAsStateWithLifecycle()
 
     MedicineContent(
         uiState = medicinesState,

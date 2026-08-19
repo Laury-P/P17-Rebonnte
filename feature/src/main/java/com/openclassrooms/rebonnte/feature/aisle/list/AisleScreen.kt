@@ -35,7 +35,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,6 +57,7 @@ import com.ramcosta.composedestinations.generated.feature.navgraphs.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
@@ -68,8 +68,8 @@ fun AisleScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val operationState by viewModel.operationState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val operationState by viewModel.operationState.collectAsStateWithLifecycle()
 
     AisleContent(
         modifier = modifier,
