@@ -1,9 +1,11 @@
-package com.openclassrooms.rebonnte
+package com.openclassrooms.rebonnte.feature.auth
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
-import com.openclassrooms.rebonnte.feature.auth.LogContent
 import org.junit.Rule
 import org.junit.Test
 
@@ -83,7 +85,7 @@ class LogScreenTest {
 
         // Vérifie la présence de l'indicateur de chargement
         composeTestRule.onNodeWithContentDescription("Chargement en cours").assertIsDisplayed()
-        
+
         // Le bouton de connexion doit disparaître pendant le chargement (remplacé par l'indicateur)
         composeTestRule.onNodeWithText("Se connecter").assertDoesNotExist()
     }

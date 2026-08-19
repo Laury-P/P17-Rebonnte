@@ -1,7 +1,14 @@
-package com.openclassrooms.rebonnte
+package com.openclassrooms.rebonnte.feature.medicine
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.openclassrooms.rebonnte.core.domain.model.History
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
@@ -23,7 +30,12 @@ class MedicineDetailScreenTest {
         aisleId = "A1",
         aisleName = "Cardiologie",
         histories = listOf(
-            History(medicineId = "med1", details = "Initial Stock", timeStamp = 1700000000000L, userId = "user1")
+            History(
+                medicineId = "med1",
+                details = "Initial Stock",
+                timeStamp = 1700000000000L,
+                userId = "user1"
+            )
         )
     )
 
@@ -43,18 +55,18 @@ class MedicineDetailScreenTest {
         }
 
         composeTestRule.onNodeWithTag("medicine_detail_title").assertTextEquals("Doliprane")
-        
+
         // Vérifie les informations de base (Labels + Valeurs)
         composeTestRule.onNodeWithText("Nom").assertIsDisplayed()
         composeTestRule.onAllNodesWithText("Doliprane").assertCountEquals(2) // title + name field
-        
+
         composeTestRule.onNodeWithText("Rayon").assertIsDisplayed()
         composeTestRule.onNodeWithText("Cardiologie").assertIsDisplayed()
-        
+
         // Vérifie le stock
         composeTestRule.onNodeWithText("Stock").assertIsDisplayed()
         composeTestRule.onNodeWithText("10").assertIsDisplayed()
-        
+
         // Vérifie l'historique
         composeTestRule.onNodeWithText("Initial Stock", substring = true).assertIsDisplayed()
     }
@@ -70,8 +82,8 @@ class MedicineDetailScreenTest {
                     uiState = UiState.Success(testMedicine),
                     updateState = OperationState.Idle,
                     deleteState = OperationState.Idle,
-                    onUpdateStock = { _, increase -> 
-                        if (increase) isIncreaseClicked = true else isDecreaseClicked = true 
+                    onUpdateStock = { _, increase ->
+                        if (increase) isIncreaseClicked = true else isDecreaseClicked = true
                     },
                     onDeleteMedicine = {},
                     onNavigateBack = {}

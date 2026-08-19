@@ -1,10 +1,9 @@
-package com.openclassrooms.rebonnte
+package com.openclassrooms.rebonnte.feature.aisle
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
-import com.openclassrooms.rebonnte.core.ui.theme.RebonnteTheme
 import com.openclassrooms.rebonnte.feature.aisle.list.AisleContent
 import com.openclassrooms.rebonnte.feature.aisle.list.ListAislesState
 import org.junit.Rule

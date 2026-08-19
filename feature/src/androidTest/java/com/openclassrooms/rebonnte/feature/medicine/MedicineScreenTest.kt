@@ -1,7 +1,11 @@
-package com.openclassrooms.rebonnte
+package com.openclassrooms.rebonnte.feature.medicine
 
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
@@ -49,11 +53,11 @@ class MedicineScreenTest {
 
         // Vérifie le titre
         composeTestRule.onNodeWithText("Médicaments").assertIsDisplayed()
-        
+
         // Vérifie les médicaments
         composeTestRule.onNodeWithText("Doliprane").assertIsDisplayed()
         composeTestRule.onNodeWithText("Aspegic").assertIsDisplayed()
-        
+
         // Vérifie les stocks
         composeTestRule.onNodeWithText("Stock: 10").assertIsDisplayed()
         composeTestRule.onNodeWithText("Stock: 5").assertIsDisplayed()
@@ -83,7 +87,7 @@ class MedicineScreenTest {
 
         // Saisit du texte dans la barre de recherche
         composeTestRule.onNodeWithText("Rechercher un médicament…").performTextInput("Doli")
-        
+
         // Vérifie que le callback est appelé
         assert(lastQuery == "Doli")
     }
@@ -173,11 +177,11 @@ class MedicineScreenTest {
 
         // Vérifie le message d'erreur
         composeTestRule.onNodeWithText("Erreur Réseau").assertIsDisplayed()
-        
+
         // Clique sur le bouton de retry (le bouton est dans ErrorComponent)
         // On suppose que le bouton contient le texte "Réessayer" ou similaire
         composeTestRule.onNodeWithText("Retry").performClick()
-        
+
         assert(retryClicked)
     }
 }
