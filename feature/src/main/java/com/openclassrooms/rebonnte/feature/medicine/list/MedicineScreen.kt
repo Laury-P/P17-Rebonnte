@@ -185,9 +185,9 @@ fun MedicineContent(
         }
     ) { innerPadding ->
         if (showNewMedicineDialog.value) {
-            var name by remember { mutableStateOf("") }
+            var name by rememberSaveable { mutableStateOf("") }
             var selectedAisle by remember { mutableStateOf(aisles.firstOrNull()) }
-            var stock by remember { mutableIntStateOf(0) }
+            var stock by rememberSaveable { mutableIntStateOf(0) }
             
             AlertDialog(
                 onDismissRequest = { showNewMedicineDialog.value = false },

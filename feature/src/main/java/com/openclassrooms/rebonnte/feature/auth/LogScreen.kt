@@ -29,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,11 +83,11 @@ fun LogContent(
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
-    var isLoginMode by remember { mutableStateOf(true) }
-    var email by remember { mutableStateOf("") }
+    var isLoginMode by rememberSaveable { mutableStateOf(true) }
+    var email by rememberSaveable { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var name by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     Scaffold { innerPadding ->
         Column(

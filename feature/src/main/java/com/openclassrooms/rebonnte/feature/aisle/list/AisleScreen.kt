@@ -38,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -100,7 +101,7 @@ fun AisleContent(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val showNewAisleDialog = remember { mutableStateOf(false) }
+    val showNewAisleDialog = rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val errorPrefix = stringResource(R.string.aisle_error_prefix)
     val logoutDesc = stringResource(R.string.aisle_logout_description)
@@ -150,7 +151,7 @@ fun AisleContent(
         }
     ) { innerPadding ->
         if (showNewAisleDialog.value) {
-            var aisleName by remember { mutableStateOf("") }
+            var aisleName by rememberSaveable { mutableStateOf("") }
             AlertDialog(
                 onDismissRequest = { showNewAisleDialog.value = false },
                 title = { Text(stringResource(R.string.aisle_new_dialog_title)) },
@@ -194,7 +195,6 @@ fun AisleContent(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Affiche le loader comme premier item de la liste si une opération est en cours
                         if (operationState is OperationState.Loading) {
                             item {
                                 LoadingComponent(
