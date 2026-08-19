@@ -72,6 +72,26 @@ class MedicineDetailScreenTest {
     }
 
     @Test
+    fun testMedicineDetailContent_Success_EmptyHistory() {
+        val medicineNoHistory = testMedicine.copy(histories = emptyList())
+        composeTestRule.setContent {
+            RebonnteTheme {
+                MedicineDetailContent(
+                    uiState = UiState.Success(medicineNoHistory),
+                    updateState = OperationState.Idle,
+                    deleteState = OperationState.Idle,
+                    onUpdateStock = { _, _ -> },
+                    onDeleteMedicine = {},
+                    onNavigateBack = {}
+                )
+            }
+        }
+
+        // Vérifie le message d'historique vide
+        composeTestRule.onNodeWithText("Aucun historique pour ce médicament").assertIsDisplayed()
+    }
+
+    @Test
     fun testMedicineDetailContent_StockControls_TriggerCallbacks() {
         var isIncreaseClicked = false
         var isDecreaseClicked = false
@@ -138,7 +158,7 @@ class MedicineDetailScreenTest {
             }
         }
 
-        // Le loader doit être présent (on vérifie qu'on ne voit plus le titre par défaut ou les infos)
+        // Le loader doit être présent
         composeTestRule.onNodeWithTag("medicine_detail_title").assertTextEquals("Détail du médicament")
     }
 

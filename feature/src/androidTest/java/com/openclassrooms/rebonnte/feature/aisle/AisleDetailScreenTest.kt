@@ -59,7 +59,7 @@ class AisleDetailScreenTest {
     @Test
     fun testAisleDetailContent_Empty_DisplaysEmptyMessage() {
         // GIVEN
-        val aisle = Aisle("1", "Cardiologie")
+        val aisle = Aisle(aisleId = "1", name = "Cardiologie")
 
         // WHEN
         composeTestRule.setContent {
@@ -77,10 +77,48 @@ class AisleDetailScreenTest {
     }
 
     @Test
+    fun testAisleDetailContent_Loading_DisplaysLoading() {
+        // WHEN
+        composeTestRule.setContent {
+            RebonnteTheme {
+                AisleDetailContent(
+                    uiState = UiState.Loading,
+                    onMedicineClick = {},
+                    onNavigateBack = {}
+                )
+            }
+        }
+
+        // THEN
+        // On vérifie que le titre par défaut est là (puisqu'on n'a pas encore le nom du rayon)
+        composeTestRule.onNodeWithTag("aisle_detail_title")
+            .assertTextEquals("Détail du rayon")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun testAisleDetailContent_Error_DisplaysError() {
+        val errorMessage = "Failed to load details"
+        // WHEN
+        composeTestRule.setContent {
+            RebonnteTheme {
+                AisleDetailContent(
+                    uiState = UiState.Error(errorMessage),
+                    onMedicineClick = {},
+                    onNavigateBack = {}
+                )
+            }
+        }
+
+        // THEN
+        composeTestRule.onNodeWithText(errorMessage, substring = true).assertIsDisplayed()
+    }
+
+    @Test
     fun testAisleDetailContent_BackClick_TriggersCallback() {
         // GIVEN
         var backClicked = false
-        val aisle = Aisle("1", "Cardiologie")
+        val aisle = Aisle(aisleId = "1", name = "Cardiologie")
 
         // WHEN
         composeTestRule.setContent {
@@ -103,7 +141,7 @@ class AisleDetailScreenTest {
     fun testAisleDetailContent_MedicineClick_TriggersCallback() {
         // GIVEN
         var clickedId: String? = null
-        val aisle = Aisle("1", "Cardiologie")
+        val aisle = Aisle(aisleId = "1", name = "Cardiologie")
         val medicine = Medicine("m1", "Doliprane", stock = 10, aisleId = "1")
 
         // WHEN

@@ -101,7 +101,6 @@ fun AisleContent(
     modifier: Modifier = Modifier
 ) {
     val showNewAisleDialog = remember { mutableStateOf(false) }
-
     val snackbarHostState = remember { SnackbarHostState() }
     val errorPrefix = stringResource(R.string.aisle_error_prefix)
     val logoutDesc = stringResource(R.string.aisle_logout_description)
@@ -188,14 +187,6 @@ fun AisleContent(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            if (operationState is OperationState.Loading) {
-                LoadingComponent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                )
-            }
-
             when (uiState) {
                 is ListAislesState.Success -> {
                     LazyColumn(
@@ -203,6 +194,17 @@ fun AisleContent(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // Affiche le loader comme premier item de la liste si une opération est en cours
+                        if (operationState is OperationState.Loading) {
+                            item {
+                                LoadingComponent(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                )
+                            }
+                        }
+
                         if (uiState.listAisle.isEmpty()) {
                             item {
                                 Text(
@@ -277,4 +279,3 @@ fun AisleItem(aisle: Aisle, onClick: () -> Unit) {
         }
     }
 }
-

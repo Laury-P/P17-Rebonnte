@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
+import com.openclassrooms.rebonnte.core.ui.theme.RebonnteTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -17,11 +18,13 @@ class LogScreenTest {
     @Test
     fun testLogContent_InitialState_IsLoginMode() {
         composeTestRule.setContent {
-            LogContent(
-                operationState = OperationState.Idle,
-                onSignIn = { _, _ -> },
-                onSignUp = { _, _, _ -> }
-            )
+            RebonnteTheme {
+                LogContent(
+                    operationState = OperationState.Idle,
+                    onSignIn = { _, _ -> },
+                    onSignUp = { _, _, _ -> }
+                )
+            }
         }
 
         // Vérifie les textes du mode Connexion
@@ -37,11 +40,13 @@ class LogScreenTest {
     @Test
     fun testLogContent_SwitchToSignupMode_ShowsExtraFields() {
         composeTestRule.setContent {
-            LogContent(
-                operationState = OperationState.Idle,
-                onSignIn = { _, _ -> },
-                onSignUp = { _, _, _ -> }
-            )
+            RebonnteTheme {
+                LogContent(
+                    operationState = OperationState.Idle,
+                    onSignIn = { _, _ -> },
+                    onSignUp = { _, _, _ -> }
+                )
+            }
         }
 
         // Clique sur le bouton pour basculer en mode Inscription
@@ -56,11 +61,13 @@ class LogScreenTest {
     @Test
     fun testLogContent_PasswordVisibilityToggle() {
         composeTestRule.setContent {
-            LogContent(
-                operationState = OperationState.Idle,
-                onSignIn = { _, _ -> },
-                onSignUp = { _, _, _ -> }
-            )
+            RebonnteTheme {
+                LogContent(
+                    operationState = OperationState.Idle,
+                    onSignIn = { _, _ -> },
+                    onSignUp = { _, _, _ -> }
+                )
+            }
         }
 
         // Par défaut, l'icône de visibilité (content description)
@@ -76,11 +83,13 @@ class LogScreenTest {
     @Test
     fun testLogContent_ShowsLoadingIndicator_WhenStateIsLoading() {
         composeTestRule.setContent {
-            LogContent(
-                operationState = OperationState.Loading,
-                onSignIn = { _, _ -> },
-                onSignUp = { _, _, _ -> }
-            )
+            RebonnteTheme {
+                LogContent(
+                    operationState = OperationState.Loading,
+                    onSignIn = { _, _ -> },
+                    onSignUp = { _, _, _ -> }
+                )
+            }
         }
 
         // Vérifie la présence de l'indicateur de chargement
@@ -94,11 +103,13 @@ class LogScreenTest {
     fun testLogContent_ShowsErrorMessage_WhenStateIsError() {
         val errorMsg = "Email invalide"
         composeTestRule.setContent {
-            LogContent(
-                operationState = OperationState.Error(errorMsg),
-                onSignIn = { _, _ -> },
-                onSignUp = { _, _, _ -> }
-            )
+            RebonnteTheme {
+                LogContent(
+                    operationState = OperationState.Error(errorMsg),
+                    onSignIn = { _, _ -> },
+                    onSignUp = { _, _, _ -> }
+                )
+            }
         }
 
         // Vérifie que le message d'erreur s'affiche
