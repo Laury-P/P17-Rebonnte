@@ -1,0 +1,80 @@
+<resources>
+    <!-- Screen Login/Signup -->
+    <string name="auth_login_title">Connexion</string>
+    <string name="auth_signup_title">Inscription</string>
+    <string name="auth_name_label">Nom complet</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Mot de passe</string>
+    <string name="auth_password_hide">Cacher le mot de passe</string>
+    <string name="auth_password_show">Afficher le mot de passe</string>
+    <string name="auth_loading_desc">Chargement en cours</string>
+    <string name="auth_login_button">Se connecter</string>
+    <string name="auth_signup_button">S\'inscrire</string>
+    <string name="auth_no_account">Pas de compte ? S\'inscrire</string>
+    <string name="auth_already_account">Déjà un compte ? Se connecter</string>
+
+    <!-- Errors -->
+    <string name="error_login">Erreur de connexion</string>
+    <string name="error_user_save">Erreur lors de l\'enregistrement utilisateur</string>
+    <string name="error_signup">Erreur lors de l\'inscription</string>
+    <string name="error_unknown">Une erreur inconnue est survenue</string>
+    <string name="error_aisle_id_missing">ID de rayon manquant</string>
+    <string name="error_medicine_id_missing">ID de médicament manquant</string>
+    <string name="error_aisle_add_failed">Le rayon n\'a pas pu être ajouté</string>
+    <string name="error_medicine_load_failed">Erreur lors du chargement des médicaments</string>
+    <string name="error_medicine_create_failed">Le médicament n\'a pas pu être créé</string>
+    <string name="error_medicine_delete_failed">Erreur lors de la suppression du médicament</string>
+
+    <!-- Aisle Screen -->
+    <string name="aisle_title">Rayons</string>
+    <string name="aisle_logout_description">Se déconnecter</string>
+    <string name="aisle_add_description">Ajouter un nouveau rayon</string>
+    <string name="aisle_new_dialog_title">Nouveau rayon</string>
+    <string name="aisle_new_label">Nom du rayon</string>
+    <string name="aisle_save">Enregistrer</string>
+    <string name="aisle_cancel">Annuler</string>
+    <string name="aisle_empty">Aucun rayon pour le moment</string>
+    <string name="aisle_error_prefix">Erreur : %1$s</string>
+    <string name="aisle_item_click_label">Ouvrir le rayon %1$s</string>
+
+    <!-- Aisle Detail Screen -->
+    <string name="aisle_detail_title_default">Détail du rayon</string>
+    <string name="aisle_back_description">Retourner à la liste</string>
+    <string name="aisle_detail_empty">Aucun médicament dans ce rayon</string>
+    <string name="aisle_detail_error_redirect">%1$s. \nVous allez être redirigé vers la liste.</string>
+    <string name="aisle_detail_medicine_click_label">Voir les détails de %1$s</string>
+
+    <!-- Medicine Screen -->
+    <string name="medicine_title">Médicaments</string>
+    <string name="medicine_add_failed">L\'ajout du médicament a échoué : %1$s</string>
+    <string name="medicine_sort_title">Trier</string>
+    <string name="medicine_sort_none">Aucun tri</string>
+    <string name="medicine_sort_name">Trier par nom</string>
+    <string name="medicine_sort_stock">Trier par stock</string>
+    <string name="medicine_search_placeholder">Rechercher un médicament…</string>
+    <string name="medicine_add_description">Ajouter un médicament</string>
+    <string name="medicine_new_dialog_title">Nouveau médicament</string>
+    <string name="medicine_new_name_label">Nom du médicament</string>
+    <string name="medicine_new_aisle_label">Sélectionner le rayon</string>
+    <string name="medicine_new_stock_label">Stock initial</string>
+
+    <!-- Medicine Detail Screen -->
+    <string name="medicine_detail_title_default">Détail du médicament</string>
+    <string name="medicine_detail_name_label">Nom</string>
+    <string name="medicine_detail_aisle_label">Rayon</string>
+    <string name="medicine_detail_stock_label">Stock</string>
+    <string name="medicine_detail_stock_increase">Augmenter le stock</string>
+    <string name="medicine_detail_stock_decrease">Diminuer le stock</string>
+    <string name="medicine_detail_history_title">Historique des mouvements</string>
+    <string name="medicine_detail_history_empty">Aucun historique pour ce médicament</string>
+    <string name="medicine_detail_delete_description">Supprimer le médicament</string>
+    <string name="medicine_detail_delete_dialog_title">Suppression</string>
+    <string name="medicine_detail_delete_confirm">Voulez-vous supprimer ce médicament ? Cette action est irréversible.</string>
+    <string name="medicine_detail_delete_button">Supprimer</string>
+    <string name="medicine_detail_update_failed">La mise à jour du stock a échoué : %1$s</string>
+    <string name="medicine_detail_delete_failed">La suppression a échoué : %1$s</string>
+    <string name="medicine_detail_delete_success">Médicament supprimé avec succès</string>
+    <string name="medicine_detail_history_item_date">Date : %1$s</string>
+    <string name="medicine_detail_history_item_user">Utilisateur : %1$s</string>
+    <string name="medicine_detail_history_item_details">Détails : %1$s</string>
+</resources>

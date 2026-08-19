@@ -6,6 +6,8 @@ import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
+import com.openclassrooms.rebonnte.feature.R
 import com.openclassrooms.rebonnte.feature.medicine.useCase.NewMedicineUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -25,7 +27,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MedicineViewModel @Inject constructor(
     private val medicineRepository: MedicineRepository,
-    private val newMedicineUseCase: NewMedicineUseCase
+    private val newMedicineUseCase: NewMedicineUseCase,
+    private val stringProvider: StringProvider
 ) : ViewModel() {
 
     private val _searchQuery = MutableStateFlow("")
@@ -68,7 +71,7 @@ class MedicineViewModel @Inject constructor(
                 }
                 ListMedicinesState.Success(listMedicine = sortedList) as ListMedicinesState
             }.catch { error ->
-                emit(ListMedicinesState.Error(error.message ?: "Error loading medicine"))
+                emit(ListMedicinesState.Error(error.message ?: stringProvider.getString(R.string.error_medicine_load_failed)))
             }
         }.stateIn(
             scope = viewModelScope,
@@ -81,7 +84,7 @@ class MedicineViewModel @Inject constructor(
             _operationState.value = OperationState.Loading
             newMedicineUseCase(name, aisleId, stock)
                 .onFailure { error ->
-                    _operationState.value = OperationState.Error(error.message ?: "Medicine couldn't be created")
+                    _operationState.value = OperationState.Error(error.message ?: stringProvider.getString(R.string.error_medicine_create_failed))
                 }
                 .onSuccess { _operationState.value = OperationState.Success }
         }

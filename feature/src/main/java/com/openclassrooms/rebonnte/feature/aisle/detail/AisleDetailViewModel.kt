@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
+import com.openclassrooms.rebonnte.feature.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,8 @@ import kotlinx.coroutines.flow.stateIn
 @HiltViewModel
 class AisleDetailViewModel @Inject constructor(
     medicineRepository: MedicineRepository,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    stringProvider: StringProvider
 ) :
     ViewModel() {
 
@@ -31,14 +34,14 @@ class AisleDetailViewModel @Inject constructor(
         ) { aisle, medicines ->
             UiState.Success(aisle = aisle, medicines = medicines) as UiState
         }
-            .catch { emit(UiState.Error(it.message ?: "Unknown error")) }
+            .catch { emit(UiState.Error(it.message ?: stringProvider.getString(R.string.error_unknown))) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = UiState.Loading
             )
     } else {
-        MutableStateFlow(UiState.Error("ID de rayon manquant"))
+        MutableStateFlow(UiState.Error(stringProvider.getString(R.string.error_aisle_id_missing)))
     }
 
 

@@ -7,6 +7,7 @@ import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.feature.medicine.useCase.GetMedicineDetailUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.UpdateStockUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.DeleteMedicineUseCase
+import com.openclassrooms.rebonnte.core.util.StringProvider
 import com.openclassrooms.rebonnte.feature.utils.MainDispatcherExtension
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -27,6 +28,9 @@ class MedicineDetailViewModelTest {
     private val getMedicineDetailUseCase = mockk<GetMedicineDetailUseCase>()
     private val updateStockUseCase = mockk<UpdateStockUseCase>()
     private val deleteMedicineUseCase = mockk<DeleteMedicineUseCase>()
+    private val stringProvider = mockk<StringProvider> {
+        every { getString(any()) } returns "Localized Error"
+    }
     private val medicineId = "med_1"
 
     private fun createViewModel(id: String? = medicineId): MedicineDetailViewModel {
@@ -36,7 +40,8 @@ class MedicineDetailViewModelTest {
             getMedicineDetailUseCase, 
             savedStateHandle, 
             updateStockUseCase,
-            deleteMedicineUseCase
+            deleteMedicineUseCase,
+            stringProvider
         )
     }
 
@@ -66,7 +71,7 @@ class MedicineDetailViewModelTest {
         // Then
         viewModel.uiState.test {
             val state = awaitItem() as UiState.Error
-            assertEquals("Medicine Id missing", state.error)
+            assertEquals("Localized Error", state.error)
         }
     }
 

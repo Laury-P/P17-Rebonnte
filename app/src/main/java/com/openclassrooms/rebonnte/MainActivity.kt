@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.internal.composableLambdaInstance
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.rememberNavController
 import com.openclassrooms.rebonnte.core.ui.theme.RebonnteTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
@@ -44,13 +44,13 @@ class MainActivity : ComponentActivity() {
                             NavigationBar {
                                 NavigationBarItem(
                                     icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                                    label = { Text("Aisle") },
+                                    label = { Text(stringResource(R.string.nav_label_aisle)) },
                                     selected = currentDestination == AisleScreenDestination,
                                     onClick = { navController.navigate(AisleScreenDestination.route) }
                                 )
                                 NavigationBarItem(
-                                    icon = { Icon(Icons.Default.List, contentDescription = null) },
-                                    label = { Text("Medicine") },
+                                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
+                                    label = { Text(stringResource(R.string.nav_label_medicine)) },
                                     selected = currentDestination == MedicineScreenDestination,
                                     onClick = { navController.navigate(MedicineScreenDestination.route) }
                                 )

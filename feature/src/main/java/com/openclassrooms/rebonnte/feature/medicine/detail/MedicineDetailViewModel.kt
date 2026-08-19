@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
+import com.openclassrooms.rebonnte.core.util.StringProvider
+import com.openclassrooms.rebonnte.feature.R
 import com.openclassrooms.rebonnte.feature.medicine.useCase.GetMedicineDetailUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.UpdateStockUseCase
 import com.openclassrooms.rebonnte.feature.medicine.useCase.DeleteMedicineUseCase
@@ -25,7 +27,8 @@ class MedicineDetailViewModel @Inject constructor(
     getMedicineDetailUseCase: GetMedicineDetailUseCase,
     savedStateHandle: SavedStateHandle,
     private val updateStockUseCase: UpdateStockUseCase,
-    private val deleteMedicineUseCase: DeleteMedicineUseCase
+    private val deleteMedicineUseCase: DeleteMedicineUseCase,
+    private val stringProvider: StringProvider
 ) : ViewModel() {
 
     private val medicineId: String? = savedStateHandle["medicineId"]
@@ -42,21 +45,21 @@ class MedicineDetailViewModel @Inject constructor(
             .map { medicine ->
                 UiState.Success(medicine) as UiState
             }
-            .catch { emit(UiState.Error(it.message ?: "Unknown error")) }
+            .catch { emit(UiState.Error(it.message ?: stringProvider.getString(R.string.error_unknown))) }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = UiState.Loading
             )
     } else {
-        MutableStateFlow(UiState.Error("Medicine Id missing"))
+        MutableStateFlow(UiState.Error(stringProvider.getString(R.string.error_medicine_id_missing)))
     }
 
     fun updateStock(medicine : Medicine, isIncrease : Boolean) {
         _updateState.value = OperationState.Loading
         viewModelScope.launch {
             updateStockUseCase(medicine, isIncrease)
-                .onFailure { _updateState.value = OperationState.Error(it.message ?: "Unknown error") }
+                .onFailure { _updateState.value = OperationState.Error(it.message ?: stringProvider.getString(R.string.error_unknown)) }
                 .onSuccess { _updateState.value = OperationState.Success }
         }
     }
@@ -67,7 +70,7 @@ class MedicineDetailViewModel @Inject constructor(
             medicineId?.let { id ->
 
                 deleteMedicineUseCase(id)
-                    .onFailure { _deleteState.value = OperationState.Error(it.message ?: "Unknown error while deleting") }
+                    .onFailure { _deleteState.value = OperationState.Error(it.message ?: stringProvider.getString(R.string.error_medicine_delete_failed)) }
                     .onSuccess { _deleteState.value = OperationState.Success }
             }
         }

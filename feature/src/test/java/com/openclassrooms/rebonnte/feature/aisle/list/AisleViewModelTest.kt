@@ -3,6 +3,7 @@ package com.openclassrooms.rebonnte.feature.aisle.list
 import app.cash.turbine.test
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
 import com.openclassrooms.rebonnte.feature.utils.MainDispatcherExtension
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -20,6 +21,9 @@ import org.junit.jupiter.api.extension.ExtendWith
 class AisleViewModelTest {
 
     private val repository = mockk<MedicineRepository>()
+    private val stringProvider = mockk<StringProvider> {
+        every { getString(any()) } returns "Localized Error"
+    }
     private lateinit var viewModel: AisleViewModel
 
     @Test
@@ -28,7 +32,7 @@ class AisleViewModelTest {
         every { repository.getListAisles() } returns flowOf(emptyList())
         
         // When
-        viewModel = AisleViewModel(repository)
+        viewModel = AisleViewModel(repository, stringProvider)
 
         // Then
         viewModel.uiState.test {
@@ -40,11 +44,11 @@ class AisleViewModelTest {
     @Test
     fun `should emit Success when repository returns data`() = runTest {
         // Given
-        val aisles = listOf(Aisle("1", "Cardio"), Aisle("2", "Ortho"))
+        val aisles = listOf(Aisle(name = "Cardio", aisleId = "1"), Aisle(name = "Ortho", aisleId = "2"))
         every { repository.getListAisles() } returns flowOf(aisles)
 
         // When
-        viewModel = AisleViewModel(repository)
+        viewModel = AisleViewModel(repository, stringProvider)
 
         // Then
         viewModel.uiState.test {
@@ -57,16 +61,17 @@ class AisleViewModelTest {
     @Test
     fun `should emit Error when repository fails`() = runTest {
         // Given
-        every { repository.getListAisles() } returns flow { throw Exception("Firestore Error") }
+        val errorMsg = "Firestore Error"
+        every { repository.getListAisles() } returns flow { throw Exception(errorMsg) }
 
         // When
-        viewModel = AisleViewModel(repository)
+        viewModel = AisleViewModel(repository, stringProvider)
 
         // Then
         viewModel.uiState.test {
             assertEquals(ListAislesState.Loading, awaitItem())
             val state = awaitItem() as ListAislesState.Error
-            assertEquals("Firestore Error", state.error)
+            assertEquals(errorMsg, state.error) // Doit être le message de l'exception
         }
     }
 
@@ -77,10 +82,10 @@ class AisleViewModelTest {
         every { repository.getListAisles() } answers {
             callCount++
             if (callCount == 1) flow { throw Exception("Fail") }
-            else flowOf(listOf(Aisle("Succes", "1")))
+            else flowOf(listOf(Aisle(name = "1", aisleId = "Succes")))
         }
 
-        viewModel = AisleViewModel(repository)
+        viewModel = AisleViewModel(repository, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListAislesState.Loading, awaitItem())
@@ -103,7 +108,7 @@ class AisleViewModelTest {
         every { repository.generateAisleId() } returns generatedId
         coEvery { repository.addAisle(any()) } returns Result.success(Unit)
 
-        viewModel = AisleViewModel(repository)
+        viewModel = AisleViewModel(repository, stringProvider)
 
         // Then
         viewModel.operationState.test {
@@ -130,7 +135,7 @@ class AisleViewModelTest {
         every { repository.generateAisleId() } returns "id_123"
         coEvery { repository.addAisle(any()) } returns Result.failure(Exception(errorMsg))
 
-        viewModel = AisleViewModel(repository)
+        viewModel = AisleViewModel(repository, stringProvider)
 
         // Then
         viewModel.operationState.test {
@@ -141,7 +146,7 @@ class AisleViewModelTest {
             
             assertEquals(com.openclassrooms.rebonnte.core.domain.model.OperationState.Loading, awaitItem())
             val state = awaitItem() as com.openclassrooms.rebonnte.core.domain.model.OperationState.Error
-            assertEquals("Add Failed", state.error)
+            assertEquals(errorMsg, state.error) // Doit être le message de l'exception
         }
     }
 }

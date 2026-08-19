@@ -5,6 +5,7 @@ import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
 import com.openclassrooms.rebonnte.feature.medicine.useCase.NewMedicineUseCase
 import com.openclassrooms.rebonnte.feature.utils.MainDispatcherExtension
 import io.mockk.coEvery
@@ -28,6 +29,9 @@ class MedicineViewModelTest {
 
     private val repository = mockk<MedicineRepository>()
     private val newMedicineUseCase = mockk<NewMedicineUseCase>()
+    private val stringProvider = mockk<StringProvider> {
+        every { getString(any()) } returns "Localized Error"
+    }
     private lateinit var viewModel: MedicineViewModel
 
     private val testMedicines = listOf(
@@ -44,7 +48,7 @@ class MedicineViewModelTest {
 
     @Test
     fun `initial state should be Loading`() = runTest {
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
@@ -54,7 +58,7 @@ class MedicineViewModelTest {
 
     @Test
     fun `should emit Success when repository returns medicines`() = runTest {
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
@@ -69,7 +73,7 @@ class MedicineViewModelTest {
 
     @Test
     fun `should filter medicines by name with debounce`() = runTest {
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
@@ -89,7 +93,7 @@ class MedicineViewModelTest {
 
     @Test
     fun `should sort medicines by name`() = runTest {
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
@@ -109,7 +113,7 @@ class MedicineViewModelTest {
 
     @Test
     fun `should sort medicines by stock`() = runTest {
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
@@ -129,9 +133,10 @@ class MedicineViewModelTest {
 
     @Test
     fun `should emit Error when repository fails`() = runTest {
-        every { repository.getListAllMedicine() } returns flow { throw Exception("Firestore Error") }
+        val errorMsg = "Firestore Error"
+        every { repository.getListAllMedicine() } returns flow { throw Exception(errorMsg) }
         
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
@@ -139,7 +144,7 @@ class MedicineViewModelTest {
             advanceTimeBy(300)
             
             val state = awaitItem() as ListMedicinesState.Error
-            assertEquals("Firestore Error", state.error)
+            assertEquals(errorMsg, state.error)
         }
     }
 
@@ -152,7 +157,7 @@ class MedicineViewModelTest {
             else flowOf(testMedicines)
         }
 
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
@@ -172,10 +177,10 @@ class MedicineViewModelTest {
 
     @Test
     fun `aisles should load correctly`() = runTest {
-        val testAisles = listOf(Aisle("A1", "Cardio"), Aisle("A2", "Ortho"))
+        val testAisles = listOf(Aisle(name = "Cardio", aisleId = "A1"), Aisle(name = "Ortho", aisleId = "A2"))
         every { repository.getListAisles() } returns flowOf(testAisles)
 
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.aisles.test {
             assertEquals(emptyList<Aisle>(), awaitItem()) // Initial value
@@ -187,7 +192,7 @@ class MedicineViewModelTest {
     fun `addMedicine should update operationState to Success on success`() = runTest {
         coEvery { newMedicineUseCase(any(), any(), any()) } returns Result.success(Unit)
         
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.operationState.test {
             assertEquals(OperationState.Idle, awaitItem())
@@ -204,9 +209,10 @@ class MedicineViewModelTest {
 
     @Test
     fun `addMedicine should update operationState to Error on failure`() = runTest {
-        coEvery { newMedicineUseCase(any(), any(), any()) } returns Result.failure(Exception("Creation Error"))
+        val errorMsg = "Creation Error"
+        coEvery { newMedicineUseCase(any(), any(), any()) } returns Result.failure(Exception(errorMsg))
         
-        viewModel = MedicineViewModel(repository, newMedicineUseCase)
+        viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.operationState.test {
             assertEquals(OperationState.Idle, awaitItem())
@@ -216,7 +222,7 @@ class MedicineViewModelTest {
 
             assertEquals(OperationState.Loading, awaitItem())
             val state = awaitItem() as OperationState.Error
-            assertEquals("Creation Error", state.error)
+            assertEquals(errorMsg, state.error)
         }
     }
 }

@@ -1,136 +1,142 @@
 package com.openclassrooms.rebonnte.feature.medicine.detail
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.openclassrooms.rebonnte.core.designsystem.common.ErrorComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.domain.model.History
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
-import com.openclassrooms.rebonnte.core.ui.theme.RebonnteTheme
-import com.openclassrooms.rebonnte.feature.auth.AuthViewModel
+import com.openclassrooms.rebonnte.feature.R
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.feature.destinations.LogScreenDestination
-import com.ramcosta.composedestinations.generated.feature.destinations.MedicineScreenDestination
-import com.ramcosta.composedestinations.generated.feature.navgraphs.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
+
+data class MedicineDetailNavArgs(
+    val medicineId: String
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Destination<RootGraph>
+@Destination<RootGraph>(navArgs = MedicineDetailNavArgs::class)
 @Composable
 fun MedicineDetailScreen(
-    medicineId: String,
     viewModel: MedicineDetailViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
-
-    val medicineState by viewModel.uiState.collectAsState()
-
-    val updateState by viewModel.updateState.collectAsState()
-
-    val deleteState by viewModel.deleteState.collectAsState()
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val showDeleteDialog = remember { mutableStateOf(false) }
+    val medicineState by viewModel.uiState.collectAsStateWithLifecycle()
+    val updateState by viewModel.updateState.collectAsStateWithLifecycle()
+    val deleteState by viewModel.deleteState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
+    val deleteSuccessMsg = stringResource(R.string.medicine_detail_delete_success)
+
+    LaunchedEffect(deleteState) {
+        if (deleteState is OperationState.Success) {
+            Toast.makeText(context, deleteSuccessMsg, Toast.LENGTH_SHORT).show()
+            navigator.navigateUp()
+        }
+    }
+
+    MedicineDetailContent(
+        uiState = medicineState,
+        updateState = updateState,
+        deleteState = deleteState,
+        onUpdateStock = { medicine, isIncrease -> viewModel.updateStock(medicine, isIncrease) },
+        onDeleteMedicine = { viewModel.deleteMedicine() },
+        onNavigateBack = { navigator.navigateUp() }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MedicineDetailContent(
+    uiState: UiState,
+    updateState: OperationState,
+    deleteState: OperationState,
+    onUpdateStock: (Medicine, Boolean) -> Unit,
+    onDeleteMedicine: () -> Unit,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val showDeleteDialog = rememberSaveable { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    val updateFailedMsg = stringResource(R.string.medicine_detail_update_failed)
+    val deleteFailedMsg = stringResource(R.string.medicine_detail_delete_failed)
+    val titleDefault = stringResource(R.string.medicine_detail_title_default)
+    val backDesc = stringResource(R.string.aisle_back_description)
+    val deleteDesc = stringResource(R.string.medicine_detail_delete_description)
 
     LaunchedEffect(updateState) {
         if (updateState is OperationState.Error) {
-            val errorMessage =
-                "Stock update failed: ${(updateState as OperationState.Error).error}"
-
             snackbarHostState.showSnackbar(
-                message = errorMessage,
+                message = updateFailedMsg.format(updateState.error),
                 withDismissAction = true
             )
         }
     }
-    
+
     LaunchedEffect(deleteState) {
         if (deleteState is OperationState.Error) {
-            val errorMessage =
-                "Delete failed: ${(deleteState as OperationState.Error).error}"
-
             snackbarHostState.showSnackbar(
-                message = errorMessage,
+                message = deleteFailedMsg.format(deleteState.error),
                 withDismissAction = true
             )
-        }
-        if (deleteState is OperationState.Success) {
-            Toast.makeText(context, "Delete success", Toast.LENGTH_SHORT).show()
-            navigator.navigate(MedicineScreenDestination)
         }
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
-                    if (medicineState is UiState.Success) {
-                        Text((medicineState as UiState.Success).medicine.name)
-                    } else {
-                        Text("Medicine Detail")
+                    val title = if (uiState is UiState.Success) uiState.medicine.name else titleDefault
+                    Text(
+                        text = title,
+                        modifier = Modifier
+                            .testTag("medicine_detail_title")
+                            .semantics { heading() }
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = backDesc
+                        )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showDeleteDialog.value = true }
+                    IconButton(
+                        onClick = { showDeleteDialog.value = true },
+                        enabled = uiState is UiState.Success && deleteState !is OperationState.Loading
                     ) {
-                        Icon(Icons.Default.DeleteForever, contentDescription = "Delete")
-                    }
-                    IconButton(onClick = {
-                        authViewModel.signOut()
-                        navigator.navigate(LogScreenDestination) {
-                            popUpTo(RootNavGraph) { inclusive = true }
-                        }
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Sign Out")
+                        Icon(
+                            imageVector = Icons.Default.DeleteForever,
+                            contentDescription = deleteDesc
+                        )
                     }
                 }
             )
@@ -139,180 +145,200 @@ fun MedicineDetailScreen(
     ) { innerPadding ->
         if (showDeleteDialog.value) {
             AlertDialog(
-                title = {Text("Delete")},
                 onDismissRequest = { showDeleteDialog.value = false },
-                text = { Text("Delete this medicine? This action is irreversible")},
+                title = { Text(stringResource(R.string.medicine_detail_delete_dialog_title)) },
+                text = { Text(stringResource(R.string.medicine_detail_delete_confirm)) },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            viewModel.deleteMedicine()
+                            onDeleteMedicine()
                             showDeleteDialog.value = false
-                        }
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text("Delete")
+                        Text(stringResource(R.string.medicine_detail_delete_button))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteDialog.value = false }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.aisle_cancel))
                     }
                 }
             )
         }
 
-        if (deleteState is OperationState.Loading || deleteState is OperationState.Success) {
-            LoadingComponent()
-        } else {
-            when (medicineState) {
-                is UiState.Success -> {
-                    val medicine = (medicineState as UiState.Success).medicine
-                    Column {
+        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            if (deleteState is OperationState.Loading) {
+                LoadingComponent(modifier = Modifier.fillMaxSize())
+            } else {
+                when (uiState) {
+                    is UiState.Success -> {
                         SuccessContent(
-                            medicine,
-                            modifier = Modifier.padding(innerPadding),
-                            addOne = { viewModel.updateStock(medicine, true) },
-                            removeOne = { viewModel.updateStock(medicine, false) },
-                            operationState = updateState
+                            medicine = uiState.medicine,
+                            operationState = updateState,
+                            onUpdateStock = onUpdateStock
                         )
                     }
-
-                }
-
-                is UiState.Loading -> LoadingComponent()
-                is UiState.Error -> {
-                    LaunchedEffect(medicineState) {
-                        delay(2000)
-                        navigator.navigate(MedicineScreenDestination)
+                    is UiState.Loading -> LoadingComponent(modifier = Modifier.fillMaxSize())
+                    is UiState.Error -> {
+                        ErrorComponent(
+                            message = uiState.error,
+                            modifier = Modifier.fillMaxSize().semantics {
+                                liveRegion = LiveRegionMode.Polite
+                            }
+                        )
                     }
-                    ErrorComponent(message = (medicineState as UiState.Error).error)
                 }
             }
         }
-
-
     }
 }
 
 @Composable
 fun SuccessContent(
     medicine: Medicine,
-    modifier: Modifier,
-    addOne: () -> Unit,
-    removeOne: () -> Unit,
-    operationState: OperationState
+    operationState: OperationState,
+    onUpdateStock: (Medicine, Boolean) -> Unit
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
+            .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TextField(
-            value = medicine.name,
-            onValueChange = {},
-            label = { Text("Name") },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
+        // Info Card
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = medicine.name,
+                onValueChange = {},
+                label = { Text(stringResource(R.string.medicine_detail_name_label)) },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.outline,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                )
+            )
+            OutlinedTextField(
+                value = medicine.aisleName,
+                onValueChange = {},
+                label = { Text(stringResource(R.string.medicine_detail_aisle_label)) },
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.outline,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                )
+            )
+        }
 
-        TextField(
-            value = medicine.aisleName,
-            onValueChange = {},
-            label = { Text("Aisle") },
-            readOnly = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        // Stock Control
+        Card(
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(
-                onClick = { removeOne() },
-                enabled = (medicine.stock > 0) && (operationState !is OperationState.Loading)
+            Row(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = Icons.Filled.KeyboardArrowDown,
-                    contentDescription = "Minus One"
+                Text(
+                    text = stringResource(R.string.medicine_detail_stock_label),
+                    style = MaterialTheme.typography.titleMedium
                 )
-            }
-            TextField(
-                value = medicine.stock.toString(),
-                onValueChange = {},
-                label = { Text("Stock") },
-                readOnly = true,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(
-                onClick = { addOne() },
-                enabled = operationState !is OperationState.Loading
-            ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowUp,
-                    contentDescription = "Plus One"
-                )
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { onUpdateStock(medicine, false) },
+                        enabled = medicine.stock > 0 && operationState !is OperationState.Loading
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = stringResource(R.string.medicine_detail_stock_decrease)
+                        )
+                    }
+                    
+                    if (operationState is OperationState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp).padding(4.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = medicine.stock.toString(),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        )
+                    }
+                    
+                    IconButton(
+                        onClick = { onUpdateStock(medicine, true) },
+                        enabled = operationState !is OperationState.Loading
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = stringResource(R.string.medicine_detail_stock_increase)
+                        )
+                    }
+                }
             }
         }
+
         Text(
-            text = "History",
+            text = stringResource(R.string.medicine_detail_history_title),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.semantics { heading() }
         )
 
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            val list = medicine.histories ?: emptyList()
-            if (list.isNotEmpty()) {
-                if (operationState is OperationState.Loading) {
-                    item { LoadingComponent() }
-                }
-                items(list) { history ->
-                    HistoryItem(history = history, medicine.name)
+        val historyList = medicine.histories ?: emptyList()
+        if (historyList.isEmpty()) {
+            Text(
+                text = stringResource(R.string.medicine_detail_history_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(bottom = 16.dp)
+            ) {
+                items(historyList) { history ->
+                    HistoryItem(history = history)
                 }
             }
         }
     }
 }
 
+
 @Composable
-fun HistoryItem(history: History, name: String) {
+fun HistoryItem(history: History) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "$name - ${history.medicineId}", fontWeight = FontWeight.Bold)
-            val userDisplay =
-                if (history.user != null) "${history.user!!.name} - ${history.user!!.email}" else history.userId
-            Text(text = "User: $userDisplay")
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             val formattedDate = remember(history.timeStamp) {
-                SimpleDateFormat(
-                    "dd/MM/yyyy HH:mm",
-                    Locale.getDefault()
-                ).format(Date(history.timeStamp))
+                SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(history.timeStamp))
             }
-            Text(text = "Date: $formattedDate")
-            Text(text = "Details: ${history.details}")
+            
+            Text(
+                text = stringResource(R.string.medicine_detail_history_item_date, formattedDate),
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Bold
+            )
+            
+            val userDisplay = history.user?.name ?: history.userId
+            Text(
+                text = stringResource(R.string.medicine_detail_history_item_user, userDisplay),
+                style = MaterialTheme.typography.bodySmall
+            )
+            
+            Text(
+                text = stringResource(R.string.medicine_detail_history_item_details, history.details),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
-    }
-}
-
-@Preview
-@Composable
-fun SuccessContentPreview() {
-    RebonnteTheme {
-        val medicine = Medicine(
-            "12345678",
-            "Doliprane",
-            12,
-            "AISLE_X",
-            "Anti-douleur",
-        )
-        SuccessContent(
-            medicine, modifier = Modifier,
-            addOne = {},
-            removeOne = {},
-            operationState = OperationState.Idle
-        )
     }
 }

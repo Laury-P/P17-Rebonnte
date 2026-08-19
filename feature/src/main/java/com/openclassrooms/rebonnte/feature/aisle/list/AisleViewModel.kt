@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
+import com.openclassrooms.rebonnte.feature.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -20,7 +22,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class AisleViewModel @Inject constructor(private val medicineRepository: MedicineRepository) :
+class AisleViewModel @Inject constructor(
+    private val medicineRepository: MedicineRepository,
+    private val stringProvider: StringProvider
+) :
     ViewModel() {
 
     private val refreshSignal = MutableSharedFlow<Unit>(replay = 1).apply {
@@ -39,7 +44,7 @@ class AisleViewModel @Inject constructor(private val medicineRepository: Medicin
                     ListAislesState.Success(list) as ListAislesState
                 }
                 .catch { error ->
-                    emit(ListAislesState.Error(error.message ?: "Unknown error"))
+                    emit(ListAislesState.Error(error.message ?: stringProvider.getString(R.string.error_unknown)))
                 }
         }.stateIn(
             scope = viewModelScope,
@@ -57,7 +62,9 @@ class AisleViewModel @Inject constructor(private val medicineRepository: Medicin
             )
             medicineRepository.addAisle(newAisle)
                 .onFailure { error ->
-                    _operationState.value = OperationState.Error(error.message ?: "Aisle could not be added")
+                    _operationState.value = OperationState.Error(
+                        error.message ?: stringProvider.getString(R.string.error_aisle_add_failed)
+                    )
                 }
                 .onSuccess {
                     _operationState.value = OperationState.Success

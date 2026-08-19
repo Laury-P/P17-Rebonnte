@@ -10,9 +10,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ErrorComponent(withRetryButton : Boolean = false, message: String, onRetryClick : () -> Unit = {}) {
+fun ErrorComponent(modifier : Modifier = Modifier, withRetryButton : Boolean = false, message: String, onRetryClick : () -> Unit = {}) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

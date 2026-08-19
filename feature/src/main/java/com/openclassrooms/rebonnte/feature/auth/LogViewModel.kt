@@ -6,6 +6,8 @@ import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.model.User
 import com.openclassrooms.rebonnte.core.domain.repository.AuthRepository
 import com.openclassrooms.rebonnte.core.domain.repository.UserRepository
+import com.openclassrooms.rebonnte.core.util.StringProvider
+import com.openclassrooms.rebonnte.feature.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +17,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class LogViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val stringProvider: StringProvider
 ) : ViewModel() {
 
     private val _operationState = MutableStateFlow<OperationState>(OperationState.Idle)
@@ -30,7 +33,7 @@ class LogViewModel @Inject constructor(
                 }
                 .onFailure {
                     _operationState.value =
-                        OperationState.Error(it.message ?: "Erreur de connexion")
+                        OperationState.Error(it.message ?: stringProvider.getString(R.string.error_login))
                 }
         }
     }
@@ -47,12 +50,12 @@ class LogViewModel @Inject constructor(
                     }
                     .onFailure {
                         _operationState.value = OperationState.Error(
-                            it.message ?: "Erreur lors de l'enregistrement utilisateur"
+                            it.message ?: stringProvider.getString(R.string.error_user_save)
                         )
                     }
             }.onFailure {
                 _operationState.value =
-                    OperationState.Error(it.message ?: "Erreur lors de l'inscription")
+                    OperationState.Error(it.message ?: stringProvider.getString(R.string.error_signup))
             }
         }
     }
