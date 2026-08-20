@@ -3,12 +3,13 @@ package com.openclassrooms.rebonnte.core.domain.repository
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.History
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.core.domain.model.MedicineSortOption
 import kotlinx.coroutines.flow.Flow
 
 interface MedicineRepository {
     fun getListAisles() : Flow<List<Aisle>>
 
-    fun getListAllMedicine() : Flow<List<Medicine>>
+    fun getListAllMedicine(sortOption: MedicineSortOption = MedicineSortOption.NONE) : Flow<List<Medicine>>
 
     fun getListMedicineByAisleId(aisleId : String) : Flow<List<Medicine>>
 

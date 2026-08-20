@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.core.domain.model.MedicineSortOption
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
 import com.openclassrooms.rebonnte.core.util.StringProvider
@@ -13,15 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -34,7 +27,7 @@ class MedicineViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    private val _sortQuery = MutableStateFlow<SortQuery>(SortQuery.None)
+    private val _sortOption = MutableStateFlow(MedicineSortOption.NONE)
 
     private val refreshSignal = MutableSharedFlow<Unit>(replay = 1).apply {
         tryEmit(Unit)
@@ -52,32 +45,30 @@ class MedicineViewModel @Inject constructor(
     val operationState : StateFlow<OperationState> = _operationState
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val uiState: StateFlow<ListMedicinesState> = refreshSignal
-        .flatMapLatest {
-            combine(
-                medicineRepository.getListAllMedicine(),
-                _searchQuery.debounce(200),
-                _sortQuery
-            ) { list, searchQuery, sortQuery ->
-                val filteredList = list.filter { medicine ->
-                    if (searchQuery.isNotBlank()) {
-                        medicine.name.contains(searchQuery, ignoreCase = true)
-                    } else true
-                }
-                val sortedList = when (sortQuery) {
-                    SortQuery.None -> filteredList
-                    SortQuery.Name -> filteredList.sortedBy { it.name.lowercase() }
-                    SortQuery.Stock -> filteredList.sortedBy { it.stock }
-                }
-                ListMedicinesState.Success(listMedicine = sortedList) as ListMedicinesState
-            }.catch { error ->
-                emit(ListMedicinesState.Error(error.message ?: stringProvider.getString(R.string.error_medicine_load_failed)))
+    val uiState: StateFlow<ListMedicinesState> = combine(
+        refreshSignal,
+        _sortOption
+    ) { _, sortOption ->
+        sortOption
+    }.flatMapLatest { sortOption ->
+        combine(
+            medicineRepository.getListAllMedicine(sortOption),
+            _searchQuery.debounce(200)
+        ) { list, searchQuery ->
+            val filteredList = list.filter { medicine ->
+                if (searchQuery.isNotBlank()) {
+                    medicine.name.contains(searchQuery, ignoreCase = true)
+                } else true
             }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ListMedicinesState.Loading
-        )
+            ListMedicinesState.Success(listMedicine = filteredList) as ListMedicinesState
+        }.catch { error ->
+            emit(ListMedicinesState.Error(error.message ?: stringProvider.getString(R.string.error_medicine_load_failed)))
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = ListMedicinesState.Loading
+    )
 
     fun addMedicine(name: String, stock: Int, aisleId: String) {
         viewModelScope.launch {
@@ -94,16 +85,8 @@ class MedicineViewModel @Inject constructor(
         _searchQuery.value = name
     }
 
-    fun sortByNone() {
-        _sortQuery.value = SortQuery.None
-    }
-
-    fun sortByName() {
-        _sortQuery.value = SortQuery.Name
-    }
-
-    fun sortByStock() {
-        _sortQuery.value = SortQuery.Stock
+    fun setSortOption(option: MedicineSortOption) {
+        _sortOption.value = option
     }
 
     fun retry() {
@@ -117,10 +100,4 @@ sealed interface ListMedicinesState {
     data object Loading : ListMedicinesState
     data class Success(val listMedicine: List<Medicine>) : ListMedicinesState
     data class Error(val error: String) : ListMedicinesState
-}
-
-sealed interface SortQuery {
-    data object None : SortQuery
-    data object Name : SortQuery
-    data object Stock : SortQuery
 }

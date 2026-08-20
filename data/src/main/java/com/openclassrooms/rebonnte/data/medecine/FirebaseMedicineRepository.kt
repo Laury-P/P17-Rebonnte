@@ -6,6 +6,7 @@ import com.google.firebase.firestore.snapshots
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.History
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.core.domain.model.MedicineSortOption
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
 import com.openclassrooms.rebonnte.data.model.HistoryDto
 import com.openclassrooms.rebonnte.data.model.MedicineDto
@@ -31,9 +32,16 @@ class FirebaseMedicineRepository @Inject constructor(
             }
     }
 
-    override fun getListAllMedicine(): Flow<List<Medicine>> {
-        return firestore.collection("medicines")
-            .snapshots()
+    override fun getListAllMedicine(sortOption: MedicineSortOption): Flow<List<Medicine>> {
+        var query: Query = firestore.collection("medicines")
+        
+        query = when (sortOption) {
+            MedicineSortOption.NONE -> query
+            MedicineSortOption.NAME -> query.orderBy("name")
+            MedicineSortOption.STOCK -> query.orderBy("stock")
+        }
+
+        return query.snapshots()
             .map { snapshots ->
                 snapshots.documents.mapNotNull { documentSnapshot ->
                     documentSnapshot.toObject(Medicine::class.java)
