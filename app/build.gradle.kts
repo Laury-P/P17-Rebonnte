@@ -23,6 +23,21 @@ android {
             useSupportLibrary = true
         }
     }
+    signingConfigs {
+        val keystoreFile = file(System.getenv("KEYSTORE_PATH") ?: "keystore_file")
+        val storePass = System.getenv("KEYSTORE_PASSWORD") ?: ""
+        val keyAlias = System.getenv("KEY_ALIAS") ?: ""
+        val keyPass = System.getenv("KEY_PASSWORD") ?: ""
+
+        if (keystoreFile.exists() && storePass.isNotEmpty() && keyAlias.isNotEmpty() && keyPass.isNotEmpty()) {
+            create("release") {
+                storeFile = keystoreFile
+                storePassword = storePass
+                this.keyAlias = keyAlias
+                keyPassword = keyPass
+            }
+        }
+    }
 
     buildTypes {
         release {
@@ -32,6 +47,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
         debug {
             enableUnitTestCoverage = true
