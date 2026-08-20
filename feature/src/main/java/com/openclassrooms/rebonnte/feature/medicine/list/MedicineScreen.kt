@@ -29,6 +29,7 @@ import com.openclassrooms.rebonnte.core.designsystem.common.LoadingComponent
 import com.openclassrooms.rebonnte.core.designsystem.common.MedicineItem
 import com.openclassrooms.rebonnte.core.designsystem.common.SearchBarComponent
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
+import com.openclassrooms.rebonnte.core.domain.model.MedicineSortOption
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.feature.R
 import com.openclassrooms.rebonnte.feature.auth.AuthViewModel
@@ -58,9 +59,7 @@ fun MedicineScreen(
         aisles = aisles,
         operationState = operationState,
         onSearchQueryChange = { viewModel.filterByName(it) },
-        onSortByName = { viewModel.sortByName() },
-        onSortByStock = { viewModel.sortByStock() },
-        onSortByNone = { viewModel.sortByNone() },
+        onSortChange = { viewModel.setSortOption(it) },
         onAddMedicine = { name, stock, aisleId -> viewModel.addMedicine(name, stock, aisleId) },
         onRetry = { viewModel.retry() },
         onMedicineClick = { id -> navigator.navigate(MedicineDetailScreenDestination(id)) },
@@ -81,9 +80,7 @@ fun MedicineContent(
     aisles: List<Aisle>,
     operationState: OperationState,
     onSearchQueryChange: (String) -> Unit,
-    onSortByName: () -> Unit,
-    onSortByStock: () -> Unit,
-    onSortByNone: () -> Unit,
+    onSortChange: (MedicineSortOption) -> Unit,
     onAddMedicine: (String, Int, String) -> Unit,
     onRetry: () -> Unit,
     onMedicineClick: (String) -> Unit,
@@ -91,7 +88,7 @@ fun MedicineContent(
     modifier: Modifier = Modifier
 ) {
     var isSearchActive by rememberSaveable { mutableStateOf(false) }
-    val showNewMedicineDialog = remember { mutableStateOf(false) }
+    val showNewMedicineDialog = rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     
     val addFailedMsg = stringResource(R.string.medicine_add_failed)
@@ -146,18 +143,15 @@ fun MedicineContent(
                                 onDismissRequest = { expanded = false },
                                 offset = DpOffset(x = 0.dp, y = 0.dp)
                             ) {
-                                DropdownMenuItem(
-                                    onClick = { onSortByNone(); expanded = false },
-                                    text = { Text(stringResource(R.string.medicine_sort_none)) }
-                                )
-                                DropdownMenuItem(
-                                    onClick = { onSortByName(); expanded = false },
-                                    text = { Text(stringResource(R.string.medicine_sort_name)) }
-                                )
-                                DropdownMenuItem(
-                                    onClick = { onSortByStock(); expanded = false },
-                                    text = { Text(stringResource(R.string.medicine_sort_stock)) }
-                                )
+                                MedicineSortOption.entries.forEach { option ->
+                                    DropdownMenuItem(
+                                        onClick = { 
+                                            onSortChange(option)
+                                            expanded = false 
+                                        },
+                                        text = { Text(stringResource(option.labelRes)) }
+                                    )
+                                }
                             }
                         }
                     }

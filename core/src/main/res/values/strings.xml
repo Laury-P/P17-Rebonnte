@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sort_none">Aucun tri</string>
+    <string name="sort_name">Trier par nom</string>
+    <string name="sort_stock">Trier par stock</string>
+</resources>

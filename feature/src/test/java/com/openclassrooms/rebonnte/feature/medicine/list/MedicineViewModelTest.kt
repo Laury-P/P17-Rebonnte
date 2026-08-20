@@ -3,6 +3,7 @@ package com.openclassrooms.rebonnte.feature.medicine.list
 import app.cash.turbine.test
 import com.openclassrooms.rebonnte.core.domain.model.Aisle
 import com.openclassrooms.rebonnte.core.domain.model.Medicine
+import com.openclassrooms.rebonnte.core.domain.model.MedicineSortOption
 import com.openclassrooms.rebonnte.core.domain.model.OperationState
 import com.openclassrooms.rebonnte.core.domain.repository.MedicineRepository
 import com.openclassrooms.rebonnte.core.util.StringProvider
@@ -42,7 +43,7 @@ class MedicineViewModelTest {
 
     @BeforeEach
     fun setup() {
-        every { repository.getListAllMedicine() } returns flowOf(testMedicines)
+        every { repository.getListAllMedicine(any()) } returns flowOf(testMedicines)
         every { repository.getListAisles() } returns flowOf(emptyList())
     }
 
@@ -77,6 +78,7 @@ class MedicineViewModelTest {
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
+            advanceTimeBy(300)
             assertEquals(testMedicines, (awaitItem() as ListMedicinesState.Success).listMedicine)
 
             // When searching
@@ -93,15 +95,18 @@ class MedicineViewModelTest {
 
     @Test
     fun `should sort medicines by name`() = runTest {
+        val sortedByName = testMedicines.sortedBy { it.name.lowercase() }
+        every { repository.getListAllMedicine(MedicineSortOption.NAME) } returns flowOf(sortedByName)
+
         viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
             advanceTimeBy(300)
-            awaitItem() // Skip initial success
+            assertEquals(testMedicines, (awaitItem() as ListMedicinesState.Success).listMedicine)
 
             // When sorting by name
-            viewModel.sortByName()
+            viewModel.setSortOption(MedicineSortOption.NAME)
             advanceTimeBy(300)
 
             val state = awaitItem() as ListMedicinesState.Success
@@ -113,15 +118,18 @@ class MedicineViewModelTest {
 
     @Test
     fun `should sort medicines by stock`() = runTest {
+        val sortedByStock = testMedicines.sortedBy { it.stock }
+        every { repository.getListAllMedicine(MedicineSortOption.STOCK) } returns flowOf(sortedByStock)
+
         viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
         viewModel.uiState.test {
             assertEquals(ListMedicinesState.Loading, awaitItem())
             advanceTimeBy(300)
-            awaitItem() // Skip initial success
+            assertEquals(testMedicines, (awaitItem() as ListMedicinesState.Success).listMedicine)
 
             // When sorting by stock
-            viewModel.sortByStock()
+            viewModel.setSortOption(MedicineSortOption.STOCK)
             advanceTimeBy(300)
 
             val state = awaitItem() as ListMedicinesState.Success
@@ -134,7 +142,7 @@ class MedicineViewModelTest {
     @Test
     fun `should emit Error when repository fails`() = runTest {
         val errorMsg = "Firestore Error"
-        every { repository.getListAllMedicine() } returns flow { throw Exception(errorMsg) }
+        every { repository.getListAllMedicine(any()) } returns flow { throw Exception(errorMsg) }
         
         viewModel = MedicineViewModel(repository, newMedicineUseCase, stringProvider)
 
@@ -151,7 +159,7 @@ class MedicineViewModelTest {
     @Test
     fun `retry should reload medicines`() = runTest {
         var callCount = 0
-        every { repository.getListAllMedicine() } answers {
+        every { repository.getListAllMedicine(any()) } answers {
             callCount++
             if (callCount == 1) flow { throw Exception("Fail") }
             else flowOf(testMedicines)
