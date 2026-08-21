@@ -115,4 +115,42 @@ class MedicineFlowIntegrationTest {
             medicineIsDisplayed("Ibuprofène")
         }
     }
+
+    @Test
+    fun testSearchMedicineFlow() {
+        // Seed more data for search
+        medicineRepository.seedMedicines(
+            listOf(
+                Medicine(medicineId = "m1", name = "Doliprane", stock = 10, aisleId = "a1", aisleName = "A"),
+                Medicine(medicineId = "m2", name = "Ibuprofène", stock = 5, aisleId = "a1", aisleName = "A"),
+                Medicine(medicineId = "m3", name = "Aspirine", stock = 20, aisleId = "a1", aisleName = "A")
+            )
+        )
+        authRepository.currentUserId = "fake_user_id"
+
+        composeTestRule.setContent {
+            RebonnteTheme {
+                val navController = rememberNavController()
+                DestinationsNavHost(navGraph = RootNavGraph, navController = navController)
+                navController.navigate(MedicineScreenDestination.route)
+            }
+        }
+
+        medicineRobot(composeTestRule) {
+            // 1. Initial check
+            verify {
+                medicineIsDisplayed("Doliprane")
+                medicineIsDisplayed("Ibuprofène")
+                medicineIsDisplayed("Aspirine")
+            }
+
+            // 2. Search "Ibu"
+            enterSearchQuery("Ibu")
+        } verify {
+            // 3. Verify filtered list
+            medicineIsDisplayed("Ibuprofène")
+            medicineIsNotDisplayed("Doliprane")
+            medicineIsNotDisplayed("Aspirine")
+        }
+    }
 }

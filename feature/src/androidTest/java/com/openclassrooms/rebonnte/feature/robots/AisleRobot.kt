@@ -33,6 +33,10 @@ class AisleRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
         composeTestRule.onNodeWithContentDescription(context.getString(R.string.aisle_logout_description)).performClick()
     }
 
+    fun clickRetry() {
+        composeTestRule.onNodeWithText("Retry").performClick()
+    }
+
     infix fun verify(block: AisleVerificationRobot.() -> Unit): AisleVerificationRobot {
         return AisleVerificationRobot(composeTestRule).apply(block)
     }

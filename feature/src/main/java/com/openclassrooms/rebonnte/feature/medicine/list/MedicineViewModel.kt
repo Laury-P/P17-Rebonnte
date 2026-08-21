@@ -53,7 +53,9 @@ class MedicineViewModel @Inject constructor(
     }.flatMapLatest { sortOption ->
         combine(
             medicineRepository.getListAllMedicine(sortOption),
-            _searchQuery.debounce(200)
+            _searchQuery.debounce { query ->
+                if (query.isEmpty()) 0L else 200L
+            }
         ) { list, searchQuery ->
             val filteredList = list.filter { medicine ->
                 if (searchQuery.isNotBlank()) {

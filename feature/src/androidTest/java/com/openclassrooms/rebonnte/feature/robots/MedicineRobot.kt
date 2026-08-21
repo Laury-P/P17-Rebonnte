@@ -41,7 +41,23 @@ class MedicineRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
     }
 
     fun clickMedicine(name: String) {
+        composeTestRule.waitUntil(5000) {
+            composeTestRule.onAllNodes(hasText(name)).fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule.onNodeWithText(name).performClick()
+    }
+
+    // Search and Filter Actions
+    fun enterSearchQuery(query: String) {
+        composeTestRule.onNodeWithText(context.getString(R.string.medicine_search_placeholder)).performTextInput(query)
+    }
+
+    fun clickSortButton() {
+        composeTestRule.onNodeWithContentDescription(context.getString(R.string.medicine_sort_title)).performClick()
+    }
+
+    fun selectSortOption(optionLabel: String) {
+        composeTestRule.onNodeWithText(optionLabel).performClick()
     }
 
     // Detail Screen Actions
@@ -70,6 +86,9 @@ class MedicineVerificationRobot(private val composeTestRule: AndroidComposeTestR
     private val context = composeTestRule.activity
 
     fun medicineIsDisplayed(name: String) {
+        composeTestRule.waitUntil(5000) {
+            composeTestRule.onAllNodes(hasText(name)).fetchSemanticsNodes().isNotEmpty()
+        }
         composeTestRule.onNodeWithText(name).assertIsDisplayed()
     }
 
@@ -79,6 +98,14 @@ class MedicineVerificationRobot(private val composeTestRule: AndroidComposeTestR
     
     fun detailTitleIsDisplayed(name: String) {
         composeTestRule.onNode(hasTestTag("medicine_detail_title") and hasText(name)).assertIsDisplayed()
+    }
+
+    fun medicineIsNotDisplayed(name: String) {
+        // Pour s'assurer que l'élément a bien disparu après un filtrage
+        composeTestRule.waitUntil(5000) {
+            composeTestRule.onAllNodes(hasText(name)).fetchSemanticsNodes().isEmpty()
+        }
+        composeTestRule.onNodeWithText(name).assertDoesNotExist()
     }
 }
 
