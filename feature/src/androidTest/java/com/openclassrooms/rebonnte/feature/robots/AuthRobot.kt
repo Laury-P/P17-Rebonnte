@@ -30,6 +30,12 @@ class AuthRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
         composeTestRule.onNodeWithText(context.getString(R.string.auth_no_account)).performClick()
     }
 
+    fun pressBack() {
+        composeTestRule.runOnUiThread {
+            composeTestRule.activity.onBackPressedDispatcher.onBackPressed()
+        }
+    }
+
     infix fun verify(block: AuthVerificationRobot.() -> Unit): AuthVerificationRobot {
         return AuthVerificationRobot(composeTestRule).apply(block)
     }

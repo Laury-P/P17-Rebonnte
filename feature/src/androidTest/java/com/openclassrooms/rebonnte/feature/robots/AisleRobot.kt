@@ -1,6 +1,7 @@
 package com.openclassrooms.rebonnte.feature.robots
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -30,7 +31,11 @@ class AisleRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
     }
 
     fun clickLogout() {
-        composeTestRule.onNodeWithContentDescription(context.getString(R.string.aisle_logout_description)).performClick()
+        val description = context.getString(R.string.aisle_logout_description)
+        composeTestRule.waitUntil(5000) {
+            composeTestRule.onAllNodes(hasContentDescription(description)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithContentDescription(description).performClick()
     }
 
     fun clickRetry() {
