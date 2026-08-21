@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.openclassrooms.rebonnte.feature.R
 
-class AisleRobot(private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>) {
+class AisleRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
 
     private val context = composeTestRule.activity
 
@@ -38,7 +38,7 @@ class AisleRobot(private val composeTestRule: AndroidComposeTestRule<ActivitySce
     }
 }
 
-class AisleVerificationRobot(private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>) {
+class AisleVerificationRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
     private val context = composeTestRule.activity
 
     fun aisleIsDisplayed(name: String) {
@@ -50,5 +50,5 @@ class AisleVerificationRobot(private val composeTestRule: AndroidComposeTestRule
     }
 }
 
-fun aisleRobot(composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>, block: AisleRobot.() -> Unit) =
+fun aisleRobot(composeTestRule: AndroidComposeTestRule<*, *>, block: AisleRobot.() -> Unit) =
     AisleRobot(composeTestRule).apply(block)

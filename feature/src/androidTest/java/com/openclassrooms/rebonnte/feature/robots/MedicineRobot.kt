@@ -9,7 +9,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.openclassrooms.rebonnte.feature.R
 
-class MedicineRobot(private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>) {
+class MedicineRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
 
     private val context = composeTestRule.activity
 
@@ -55,7 +55,7 @@ class MedicineRobot(private val composeTestRule: AndroidComposeTestRule<Activity
     }
 }
 
-class MedicineVerificationRobot(private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>) {
+class MedicineVerificationRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
     private val context = composeTestRule.activity
 
     fun medicineIsDisplayed(name: String) {
@@ -71,5 +71,5 @@ class MedicineVerificationRobot(private val composeTestRule: AndroidComposeTestR
     }
 }
 
-fun medicineRobot(composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>, block: MedicineRobot.() -> Unit) =
+fun medicineRobot(composeTestRule: AndroidComposeTestRule<*, *>, block: MedicineRobot.() -> Unit) =
     MedicineRobot(composeTestRule).apply(block)

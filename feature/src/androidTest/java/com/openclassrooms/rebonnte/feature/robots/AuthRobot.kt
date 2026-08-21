@@ -10,7 +10,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.openclassrooms.rebonnte.feature.R
 import androidx.activity.ComponentActivity
 
-class AuthRobot(private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>) {
+class AuthRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
 
     private val context = composeTestRule.activity
 
@@ -35,7 +35,7 @@ class AuthRobot(private val composeTestRule: AndroidComposeTestRule<ActivityScen
     }
 }
 
-class AuthVerificationRobot(private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>) {
+class AuthVerificationRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
     private val context = composeTestRule.activity
 
     fun errorIsDisplayed(error: String) {
@@ -47,5 +47,5 @@ class AuthVerificationRobot(private val composeTestRule: AndroidComposeTestRule<
     }
 }
 
-fun authRobot(composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<*>, *>, block: AuthRobot.() -> Unit) =
+fun authRobot(composeTestRule: AndroidComposeTestRule<*, *>, block: AuthRobot.() -> Unit) =
     AuthRobot(composeTestRule).apply(block)

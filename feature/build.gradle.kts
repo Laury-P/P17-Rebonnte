@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         minSdk = 24
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.openclassrooms.rebonnte.feature.HiltTestRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
