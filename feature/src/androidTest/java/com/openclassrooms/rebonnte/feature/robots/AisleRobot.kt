@@ -54,6 +54,10 @@ class AisleVerificationRobot(private val composeTestRule: AndroidComposeTestRule
         composeTestRule.onNodeWithText(name).assertIsDisplayed()
     }
     
+    fun errorIsDisplayed() {
+        composeTestRule.onNodeWithText("Retry").assertIsDisplayed()
+    }
+    
     fun emptyStateIsDisplayed() {
         composeTestRule.onNodeWithText(context.getString(R.string.aisle_empty)).assertIsDisplayed()
     }

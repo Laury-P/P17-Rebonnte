@@ -15,12 +15,19 @@ class FakeMedicineRepository : MedicineRepository {
     private val aislesFlow = MutableStateFlow<List<Aisle>>(emptyList())
     private val medicinesFlow = MutableStateFlow<List<Medicine>>(emptyList())
 
+    /**
+     * If true, all flows will throw an Exception and all suspend functions will return Failure.
+     */
     var shouldReturnError = false
 
-    override fun getListAisles(): Flow<List<Aisle>> = aislesFlow
+    override fun getListAisles(): Flow<List<Aisle>> = aislesFlow.map { 
+        if (shouldReturnError) throw Exception("Flow Error")
+        it
+    }
 
     override fun getListAllMedicine(sortOption: MedicineSortOption): Flow<List<Medicine>> {
         return medicinesFlow.map { list ->
+            if (shouldReturnError) throw Exception("Flow Error")
             when (sortOption) {
                 MedicineSortOption.NAME -> list.sortedBy { it.name }
                 MedicineSortOption.STOCK -> list.sortedBy { it.stock }
@@ -30,25 +37,34 @@ class FakeMedicineRepository : MedicineRepository {
     }
 
     override fun getListMedicineByAisleId(aisleId: String): Flow<List<Medicine>> {
-        return medicinesFlow.map { list -> list.filter { it.aisleId == aisleId } }
+        return medicinesFlow.map { list -> 
+            if (shouldReturnError) throw Exception("Flow Error")
+            list.filter { it.aisleId == aisleId } 
+        }
     }
 
     override fun getAisleNameById(aisleId: String): Flow<Aisle> {
-        return aislesFlow.map { list -> list.first { it.aisleId == aisleId } }
+        return aislesFlow.map { list -> 
+            if (shouldReturnError) throw Exception("Flow Error")
+            list.first { it.aisleId == aisleId } 
+        }
     }
 
     override fun getMedicineDetailById(medicineId: String): Flow<Medicine> {
-        return medicinesFlow.map { list -> list.first { it.medicineId == medicineId } }
+        return medicinesFlow.map { list -> 
+            if (shouldReturnError) throw Exception("Flow Error")
+            list.first { it.medicineId == medicineId } 
+        }
     }
 
     override suspend fun addAisle(aisle: Aisle): Result<Unit> {
-        if (shouldReturnError) return Result.failure(Exception("Fake Error"))
+        if (shouldReturnError) return Result.failure(Exception("Action Error"))
         aislesFlow.update { it + aisle }
         return Result.success(Unit)
     }
 
     override suspend fun saveMedicine(medicine: Medicine, history: History): Result<Unit> {
-        if (shouldReturnError) return Result.failure(Exception("Fake Error"))
+        if (shouldReturnError) return Result.failure(Exception("Action Error"))
         medicinesFlow.update { list ->
             val index = list.indexOfFirst { it.medicineId == medicine.medicineId }
             if (index != -1) {
@@ -61,7 +77,7 @@ class FakeMedicineRepository : MedicineRepository {
     }
 
     override suspend fun deleteMedicine(medicineId: String): Result<Unit> {
-        if (shouldReturnError) return Result.failure(Exception("Fake Error"))
+        if (shouldReturnError) return Result.failure(Exception("Action Error"))
         medicinesFlow.update { list -> list.filterNot { it.medicineId == medicineId } }
         return Result.success(Unit)
     }
@@ -70,7 +86,6 @@ class FakeMedicineRepository : MedicineRepository {
 
     override fun generateMedicineId(): String = "med_${System.currentTimeMillis()}"
     
-    // Helper to seed data
     fun seedAisles(aisles: List<Aisle>) {
         aislesFlow.value = aisles
     }
