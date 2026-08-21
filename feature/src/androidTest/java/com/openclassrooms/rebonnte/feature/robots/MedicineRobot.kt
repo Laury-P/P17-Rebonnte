@@ -1,6 +1,10 @@
 package com.openclassrooms.rebonnte.feature.robots
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -23,6 +27,13 @@ class MedicineRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
 
     fun enterInitialStock(stock: String) {
         composeTestRule.onNodeWithText(context.getString(R.string.medicine_new_stock_label)).performTextInput(stock)
+    }
+
+    fun selectAisle(aisleName: String) {
+        // 1. Cliquer sur le sélecteur pour ouvrir le menu
+        composeTestRule.onNodeWithText(context.getString(R.string.medicine_new_aisle_label)).performClick()
+        // 2. Cliquer sur le rayon spécifiquement DANS la popup du menu
+        composeTestRule.onNode(hasText(aisleName) and hasAnyAncestor(isPopup())).performClick()
     }
 
     fun clickSaveMedicine() {
@@ -67,7 +78,7 @@ class MedicineVerificationRobot(private val composeTestRule: AndroidComposeTestR
     }
     
     fun detailTitleIsDisplayed(name: String) {
-        composeTestRule.onNodeWithText(name).assertIsDisplayed()
+        composeTestRule.onNode(hasTestTag("medicine_detail_title") and hasText(name)).assertIsDisplayed()
     }
 }
 
