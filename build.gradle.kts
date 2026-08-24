@@ -184,15 +184,13 @@ subprojects {
     apply(plugin = "org.sonarqube")
     sonar {
         properties {
-            // Important : Chaque module doit pointer vers le rapport Jacoco racine pour que Sonar fasse le lien
-            val reportPath = "${rootProject.layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+            // On retire sonar.sources qui faisait planter le module :app (src/main/kotlin absent)
+            
+            // On force le chemin vers le rapport XML de la RACINE
+            val reportPath = "${rootProject.projectDir}/build/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
             property("sonar.coverage.jacoco.xmlReportPaths", reportPath)
             
-            // Précise où chercher les sources pour éviter que Sonar ne cherche dans build/
-            property("sonar.sources", "src/main/java,src/main/kotlin")
-            
             property("sonar.coverage.exclusions", jacocoExcludes.joinToString(","))
-
             val binaryExclusions = listOf("**/*.webp", "**/*.png", "**/*.jpg", "**/*.svg")
             property("sonar.exclusions", binaryExclusions.joinToString(","))
         }
