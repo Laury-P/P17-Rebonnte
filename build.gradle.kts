@@ -180,10 +180,19 @@ sonar {
 }
 
 subprojects {
-    // On laisse le plugin Sonar détecter automatiquement les sources Android
+    apply(plugin = "org.sonarqube") // S'assure que le plugin est actif partout
+    sonar {
+        properties {
+            val reportPath = "${rootProject.layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+            property("sonar.coverage.jacoco.xmlReportPaths", reportPath)
+        }
+    }
 }
 
 tasks.named("sonar") {
-    // Sonar a besoin que le rapport Jacoco existe AVANT de se lancer
+    dependsOn("jacocoFullReport")
+}
+
+tasks.named("jacocoFullReport") {
     dependsOn("runAllCoverageAndReport")
 }
