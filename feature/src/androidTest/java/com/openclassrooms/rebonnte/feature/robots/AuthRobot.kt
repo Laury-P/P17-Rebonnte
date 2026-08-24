@@ -31,9 +31,7 @@ class AuthRobot(private val composeTestRule: AndroidComposeTestRule<*, *>) {
     }
 
     fun pressBack() {
-        composeTestRule.runOnUiThread {
-            composeTestRule.activity.onBackPressedDispatcher.onBackPressed()
-        }
+        androidx.test.espresso.Espresso.pressBack()
     }
 
     infix fun verify(block: AuthVerificationRobot.() -> Unit): AuthVerificationRobot {

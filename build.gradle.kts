@@ -109,8 +109,9 @@ tasks.register<JacocoReport>("jacocoFullReport") {
     }
 
     doLast {
-        println("✅ Combined coverage report generated at:")
-        println("📄 file://${reports.html.outputLocation.get()}/index.html")
+        println(" Combined coverage report generated at:")
+        println(" file://${reports.html.outputLocation.get()}/index.html")
+        println(" file://${reports.xml.outputLocation.get()}/jacocoFullReport.xml")
     }
 }
 
@@ -164,13 +165,6 @@ sonar {
         property("sonar.projectName", "rebonnte")
         property("sonar.host.url", "https://sonarcloud.io")
 
-        // On définit le rapport de couverture au niveau global
-        val reportPath = "${layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
-        property("sonar.coverage.jacoco.xmlReportPaths", reportPath)
-
-        val binaryExclusions = listOf("**/*.webp", "**/*.png", "**/*.jpg", "**/*.svg")
-        property("sonar.exclusions", (jacocoExcludes + binaryExclusions).joinToString(","))
-
         // Le token est récupéré ici, mais s'il est vide, la tâche échouera (c'est normal en local sans config)
         val sonarToken = System.getenv("SONAR_TOKEN") ?: ""
         if (sonarToken.isNotEmpty()) {
@@ -183,16 +177,13 @@ subprojects {
     apply(plugin = "org.sonarqube") // S'assure que le plugin est actif partout
     sonar {
         properties {
-            val reportPath = "${rootProject.layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+            // On définit le rapport de couverture au niveau global
+            val reportPath = "${layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
             property("sonar.coverage.jacoco.xmlReportPaths", reportPath)
+            property("sonar.coverage.exclusions", jacocoExcludes.joinToString(","))
+
+            val binaryExclusions = listOf("**/*.webp", "**/*.png", "**/*.jpg", "**/*.svg")
+            property("sonar.exclusions", binaryExclusions.joinToString(","))
         }
     }
-}
-
-tasks.named("sonar") {
-    dependsOn("jacocoFullReport")
-}
-
-tasks.named("jacocoFullReport") {
-    dependsOn("runAllCoverageAndReport")
 }
