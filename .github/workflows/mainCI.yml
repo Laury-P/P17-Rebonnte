@@ -2,9 +2,9 @@ name: Main CI (Quality & Analysis)
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - 'release/**'
+      - 'release-*'
 
 jobs:
   quality-analysis:
