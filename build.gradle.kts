@@ -46,58 +46,70 @@ tasks.register<JacocoReport>("jacocoFullReport") {
     group = "Reports"
     description = "Generate JaCoCo coverage reports (Unit + Instrumented) for all modules"
 
-    val javaClasses = mutableListOf<FileTree>()
-    val kotlinClasses = mutableListOf<FileTree>()
+    // S'assure que tout est compilé avant de chercher les .class
+    dependsOn(rootProject.subprojects.mapNotNull { proj ->
+        proj.tasks.findByName("compileDebugKotlin") ?: proj.tasks.findByName("compileKotlin")
+    })
+
     val sourceDirs = mutableListOf<File>()
     val executionDataFiles = mutableListOf<FileTree>()
 
     rootProject.subprojects.forEach { proj ->
         val buildDir = proj.layout.buildDirectory.get().asFile
 
-        // Dossiers sources possibles (priorité à la version finale transformée)
-        val transformedDir = File(buildDir, "intermediates/classes/debug/transformDebugClassesWithAsm/dirs")
-        val kotlinDir = File(buildDir, "intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")
-        val javaDir = File(buildDir, "intermediates/javac/debug/compileDebugJavaWithJavac/classes")
-
-        if (transformedDir.exists()) {
-            javaClasses.add(proj.fileTree(transformedDir) {
-                include("com/openclassrooms/rebonnte/**")
-                exclude(jacocoExcludes)
-            })
-        } else {
-            if (kotlinDir.exists()) {
-                javaClasses.add(proj.fileTree(kotlinDir) {
-                    include("com/openclassrooms/rebonnte/**")
-                    exclude(jacocoExcludes)
-                })
-            }
-            if (javaDir.exists()) {
-                javaClasses.add(proj.fileTree(javaDir) {
-                    include("com/openclassrooms/rebonnte/**")
-                    exclude(jacocoExcludes)
-                })
-            }
-        }
-
         // Sources
         val sDirJava = File(proj.projectDir, "src/main/java")
         if (sDirJava.exists()) sourceDirs.add(sDirJava)
-        
         val sDirKotlin = File(proj.projectDir, "src/main/kotlin")
         if (sDirKotlin.exists()) sourceDirs.add(sDirKotlin)
 
-        // Données d'exécution (Unitaires + Instrumentés)
+        // Données d'exécution (.exec et .ec)
         executionDataFiles.add(proj.fileTree(buildDir) {
             include(
-                "jacoco/*.exec",
                 "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
-                "outputs/code_coverage/debugAndroidTest/connected/**/*.ec"
+                "outputs/code_coverage/debugAndroidTest/connected/**/*.ec",
+                "jacoco/*.exec"
             )
         })
     }
 
+    // Évaluation RETARDÉE (Lazy) pour les classDirectories :
+    // Le code à l'intérieur du filesProvider ne s'exécute QU'AU MOMENT où la tâche tourne (après la compilation)
+    classDirectories.setFrom(files({
+        val javaClasses = mutableListOf<FileTree>()
+
+        rootProject.subprojects.forEach { proj ->
+            val buildDir = proj.layout.buildDirectory.get().asFile
+
+            // Dossiers potentiels compilés
+            val transformedDir = File(buildDir, "intermediates/classes/debug/transformDebugClassesWithAsm/dirs")
+            val kotlinDir = File(buildDir, "tmp/kotlin-classes/debug") // Dossier Kotlin standard AGP récent
+            val javaDir = File(buildDir, "intermediates/javac/debug/compileDebugJavaWithJavac/classes")
+
+            if (transformedDir.exists()) {
+                javaClasses.add(proj.fileTree(transformedDir) {
+                    include("com/openclassrooms/rebonnte/**")
+                    exclude(jacocoExcludes)
+                })
+            } else {
+                if (kotlinDir.exists()) {
+                    javaClasses.add(proj.fileTree(kotlinDir) {
+                        include("com/openclassrooms/rebonnte/**")
+                        exclude(jacocoExcludes)
+                    })
+                }
+                if (javaDir.exists()) {
+                    javaClasses.add(proj.fileTree(javaDir) {
+                        include("com/openclassrooms/rebonnte/**")
+                        exclude(jacocoExcludes)
+                    })
+                }
+            }
+        }
+        javaClasses
+    }))
+
     sourceDirectories.setFrom(files(sourceDirs))
-    classDirectories.setFrom(files(javaClasses + kotlinClasses))
     executionData.setFrom(files(executionDataFiles))
 
     reports {
