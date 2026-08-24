@@ -58,4 +58,4 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           # La tâche sonar déclenche automatiquement les tests et jacoco
-          script: ./gradlew sonar --stacktrace
+          script: ./gradlew sonar -Dsonar.branch.name=main --stacktrace
