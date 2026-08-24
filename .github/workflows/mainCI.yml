@@ -57,4 +57,4 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew runAllCoverageAndReport sonar -Dsonar.branch.name=main --stacktrace
+          script: ./gradlew runAllCoverageAndReport sonar -Dsonar.branch.name=main --info
