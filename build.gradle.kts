@@ -103,15 +103,15 @@ tasks.register<JacocoReport>("jacocoFullReport") {
     reports {
         val reportDir = layout.buildDirectory.dir("reports/jacoco/jacocoFullReport")
         xml.required.set(true)
-        xml.outputLocation.set(reportDir.get().file("jacocoFullReport.xml"))
+        xml.outputLocation.set(File(reportDir.get().asFile, "jacocoFullReport.xml"))
         html.required.set(true)
         html.outputLocation.set(reportDir.get().asFile)
     }
 
     doLast {
         println(" Combined coverage report generated at:")
-        println(" file://${reports.html.outputLocation.get()}/index.html")
-        println(" file://${reports.xml.outputLocation.get()}/jacocoFullReport.xml")
+        println(" file://${reports.html.outputLocation.get().asFile.absolutePath}/index.html")
+        println(" file://${reports.xml.outputLocation.get().asFile.absolutePath}")
     }
 }
 
@@ -165,7 +165,14 @@ sonar {
         property("sonar.projectName", "rebonnte")
         property("sonar.host.url", "https://sonarcloud.io")
 
-        // Le token est récupéré ici, mais s'il est vide, la tâche échouera (c'est normal en local sans config)
+        // Rapport global pour le projet racine
+        val reportPath = "${layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+        property("sonar.coverage.jacoco.xmlReportPaths", reportPath)
+
+        val binaryExclusions = listOf("**/*.webp", "**/*.png", "**/*.jpg", "**/*.svg")
+        property("sonar.exclusions", binaryExclusions.joinToString(","))
+        property("sonar.coverage.exclusions", jacocoExcludes.joinToString(","))
+
         val sonarToken = System.getenv("SONAR_TOKEN") ?: ""
         if (sonarToken.isNotEmpty()) {
             property("sonar.token", sonarToken)
@@ -174,12 +181,16 @@ sonar {
 }
 
 subprojects {
-    apply(plugin = "org.sonarqube") // S'assure que le plugin est actif partout
+    apply(plugin = "org.sonarqube")
     sonar {
         properties {
-            // On définit le rapport de couverture au niveau global
-            val reportPath = "${layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
+            // Important : Chaque module doit pointer vers le rapport Jacoco racine pour que Sonar fasse le lien
+            val reportPath = "${rootProject.layout.buildDirectory.get().asFile.absolutePath}/reports/jacoco/jacocoFullReport/jacocoFullReport.xml"
             property("sonar.coverage.jacoco.xmlReportPaths", reportPath)
+            
+            // Précise où chercher les sources pour éviter que Sonar ne cherche dans build/
+            property("sonar.sources", "src/main/java,src/main/kotlin")
+            
             property("sonar.coverage.exclusions", jacocoExcludes.joinToString(","))
 
             val binaryExclusions = listOf("**/*.webp", "**/*.png", "**/*.jpg", "**/*.svg")
