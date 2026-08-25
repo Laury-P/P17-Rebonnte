@@ -4,12 +4,14 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
       <trusted-artifacts>
-         <!-- Fait confiance aux binaires AAPT2 générés par Google quel que soit l'OS (Linux, Mac, Windows) -->
-         <trust group="com.android.tools.build" name="aapt2"/>
-
-         <!-- Optionnel : Fait aussi confiance aux sources/javadocs si Android Studio se plaint -->
-         <trust file=".*-sources[.]jar"/>
          <trust file=".*-javadoc[.]jar"/>
+         <trust file=".*-sources[.]jar"/>
+         <trust group="com.android.tools.build" name="aapt2"/>
+         <trust group="com.google.guava" reason="Google official artifacts"/>
+         <trust group="com.google.firebase" reason="Firebase official artifacts"/>
+         <trust group="org.junit" reason="JUnit official artifacts"/>
+         <trust group="org.junit.jupiter" reason="JUnit official artifacts"/>
+         <trust group="org.junit.platform" reason="JUnit official artifacts"/>
       </trusted-artifacts>
    </configuration>
    <components>
