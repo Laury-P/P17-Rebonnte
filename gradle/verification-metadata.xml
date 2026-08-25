@@ -3,6 +3,14 @@
    <configuration>
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
+      <trusted-artifacts>
+         <!-- Fait confiance aux binaires AAPT2 générés par Google quel que soit l'OS (Linux, Mac, Windows) -->
+         <trust group="com.android.tools.build" name="aapt2"/>
+
+         <!-- Optionnel : Fait aussi confiance aux sources/javadocs si Android Studio se plaint -->
+         <trust file=".*-sources[.]jar"/>
+         <trust file=".*-javadoc[.]jar"/>
+      </trusted-artifacts>
    </configuration>
    <components>
       <component group="androidx.activity" name="activity" version="1.5.1">
