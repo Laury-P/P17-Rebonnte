@@ -42,7 +42,7 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Setup Node.js
-        uses: actions/setup-node@0a44ba78417256731a5e2d7638c5f8fb6c7322d6 # v4.0.4
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdaf5df # v4.2.0
         with:
           node-version: 20
 
