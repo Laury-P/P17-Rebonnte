@@ -42,12 +42,14 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Deploy to Firebase App Distribution
-        uses: w9jds/setup-firebase@v2
+        uses: w9jds/setup-firebase@8697853112b23a7bb14ec7a7021eb32c4bf19ed4 # main (Node 20)
         with:
           gcp_sa_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Upload APK to Firebase
+        env:
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
           npx firebase-tools appdistribution:distribute app/build/outputs/apk/release/app-release.apk \
-            --app "${{ secrets.FIREBASE_APP_ID }}" \
+            --app "$FIREBASE_APP_ID" \
             --groups "testeurs-A"
