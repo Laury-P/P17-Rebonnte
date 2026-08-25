@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">rebonnte</string>
+
+    <string name="nav_label_aisle">Aisle</string>
+    <string name="nav_label_medicine">Medicine</string>
 </resources>

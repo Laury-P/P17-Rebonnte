@@ -21,4 +21,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "rebonnte"
 include(":app")
+include(":core")
+include(":data")
+include(":feature")
  
