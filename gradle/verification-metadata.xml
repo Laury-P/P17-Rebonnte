@@ -7,6 +7,9 @@
          <trust file=".*-javadoc[.]jar"/>
          <trust file=".*-sources[.]jar"/>
          <trust group="com.android.tools.build" name="aapt2"/>
+         <trust group="org.junit" reason="JUnit official artifacts"/>
+         <trust group="org.junit.jupiter" reason="JUnit official artifacts"/>
+         <trust group="org.junit.platform" reason="JUnit official artifacts"/>
       </trusted-artifacts>
    </configuration>
    <components>
